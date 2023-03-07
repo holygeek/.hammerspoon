@@ -74,7 +74,9 @@ function obj:run(appName, titlePattern)
 			local i, j, windowName = string.find(title, titlePattern)
 			if windowName ~= nil and #windowName > 0 then
 				local f = windowPos[windowName]
-				if not atRightLocation(v, f) then
+				if not f then
+					print('hmm ' .. windowName .. ' has no entry in windowPos')
+				elseif not atRightLocation(v, f) then
 					moved = 1
 					print(windowName .. ' misplaced')
 					placeWindow(v, f, windowName)
