@@ -97,7 +97,7 @@ hs.hotkey.bind({"alt"}, "z", function() hs.application.get("zoom.us"):activate(t
 local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
 	rw:run('Chrome', '%[([^%]]+)%]')
-	rw:run('iTerm', '(%a) %(%-?%a+%)')
+	rw:run('iTerm', '^(%a)$')
 	rw:run('zoom', '(.+)')
 	rw:run('Slack', '.+(Slack)$')
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
@@ -106,9 +106,20 @@ end)
 hs.hotkey.showHotkeys({"cmd", "shift"}, "k")
 
 -- alt+key
+local iterms = { "s", "a", "f", "g", "h", "i", "k", "l", "r", "v" }
 function raiseWindow(titlePattern)
 	return function()
 		hs.window.find(titlePattern):focus()
+	end
+end
+function raiseIterm(termName)
+	hs.window.find('^' .. termName .. '$'):focus()
+end
+function startTmux()
+	for i=1,#iterms do
+		local termName = iterms[i]
+		raiseIterm(termName)
+		hs.eventtap.keyStrokes('tm ' .. termName .. '\n')
 	end
 end
 -- chrome windows
@@ -118,11 +129,11 @@ hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Cisco"):activate() 
 -- slack
 hs.hotkey.bind({"alt"}, "c", raiseWindow("Slack"))
 -- iterm2 windows
-hs.hotkey.bind({"alt"}, "s", raiseWindow("Default: s %("))
-local iterms = { "a", "f", "g", "h", "i", "k", "l", "r", "v" }
+-- ==============
+hs.hotkey.bind({"cmd", "alt"}, "t", startTmux)
 for i=1,#iterms do
 	local termName = iterms[i]
-	hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. ' %('))
+	hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. '$'))
 end
 
 -- hs.console.clearConsole()
