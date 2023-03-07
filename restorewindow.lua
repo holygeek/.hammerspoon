@@ -51,17 +51,19 @@ function obj:run(appName, titlePattern)
 	local windowPos = {}
 	local filename = os.getenv('HOME') .. '/.hammerspoon/.windows.' .. appName
 	for line in io.lines(filename) do
-		local x, y, w, h, windowName = string.match(line, "([+-]?%d+) ([+-]?%d+) ([+-]?%d+) ([+-]?%d+) (.+)")
-		x = tonumber(x)
-		y = tonumber(y)
-		h = tonumber(h)
-		w = tonumber(w)
-		windowPos[windowName] = {
-			x = x,
-			y = y,
-			w = w,
-			h = h
-		}
+		if string.sub(line, 1, 1) ~= '#' then
+			local x, y, w, h, windowName = string.match(line, "([+-]?%d+) ([+-]?%d+) ([+-]?%d+) ([+-]?%d+) (.+)")
+			x = tonumber(x)
+			y = tonumber(y)
+			h = tonumber(h)
+			w = tonumber(w)
+			windowPos[windowName] = {
+				x = x,
+				y = y,
+				w = w,
+				h = h
+			}
+		end
 	end
 
 	local moved = false
