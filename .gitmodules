@@ -1,0 +1,3 @@
+[submodule "Spoons/SkyRocket.spoon"]
+	path = Spoons/SkyRocket.spoon
+	url = https://github.com/dbalatero/SkyRocket.spoon.git

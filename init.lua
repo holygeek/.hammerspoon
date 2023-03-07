@@ -67,6 +67,22 @@ hs.hotkey.bind({"alt", "shift"}, "Z", openswitch("zoom.us"))
 hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
 hs.hotkey.bind({"alt", "shift"}, "H", function() hs.application.get("Hammerspoon"):activate(true) end)
 
+-- SkyRocket.spoon
+local SkyRocket = hs.loadSpoon("SkyRocket")
+sky = SkyRocket:new({
+  -- Opacity of resize canvas
+  opacity = 0.3,
+  -- Which modifiers to hold to move a window?
+  -- moveModifiers = {'cmd', 'shift'},
+  moveModifiers = {'alt'},
+  -- Which mouse button to hold to move a window?
+  moveMouseButton = 'left',
+  -- Which modifiers to hold to resize a window?
+  resizeModifiers = {'alt', 'shift'},
+  -- Which mouse button to hold to resize a window?
+  resizeMouseButton = 'left',
+})
+
 function focusLastFocused()
 	local wf = hs.window.filter
 	local lastFocused = wf.defaultCurrentSpace:getWindows(wf.sortByFocusedLast)
