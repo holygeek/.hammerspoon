@@ -103,3 +103,7 @@ hs.hotkey.bind({"alt"}, "x", function()
 end)
 
 hs.hotkey.showHotkeys({"cmd", "shift"}, "k")
+
+-- hs.console.clearConsole()
+-- hs.hints.windowHints(hs.window.focusedWindow():application():allWindows())
+-- hs.hints.windowHints()
