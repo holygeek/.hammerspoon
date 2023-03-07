@@ -32,7 +32,7 @@ function placeWindow(v, f, windowName)
 	-- v:setSize({ w = f.w, h = f.h })
 	local nAttempts = 20
 	for i=1,nAttempts do -- try 10 times
-		print(' ' .. i .. ' moving ' .. windowName)
+		print(' ' .. i .. ' moving ' .. windowName .. string.format(" w:setFrame(hs.geometry.new(%d, %d, %d, %d)", f.x, f.y, f.w, f.h))
 		v:setFrame(hs.geometry.new(f.x, f.y, f.w, f.h))
 		if atRightLocation(v, f) then
 			print(' ' .. windowName .. ' done after ' .. i .. '.0 attempts')
