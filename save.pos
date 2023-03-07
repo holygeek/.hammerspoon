@@ -6,7 +6,12 @@ local settings = {
 		titlePattern = '%[([^%]]+)%]',
 	},
 	iTerm = {
-		titlePattern = '(%a) %(tmux%)',
+		titlePattern = '^(%a)$',
+	},
+	itermlaptop = {
+		titlePattern = '^(%a)$',
+		appName = 'iTerm',
+		fileSuffix = 'iTerm.laptop',
 	},
 	Slack = {
 		titlePattern = '.+(Slack)$'
@@ -17,7 +22,8 @@ if #_cli.args <= 1 then
 	print("usage: save.pos <appName>")
 	do return end
 end
-local appName = _cli.args[2]
+local cliName = _cli.args[2]
+local appName = cliName
 if appName == 'chrome' then appName = 'Chrome' end
 if appName == 'iterm' then appName = 'iTerm' end
 if appName == 'slack' then appName = 'Slack' end
@@ -25,6 +31,9 @@ if appName == 'slack' then appName = 'Slack' end
 local titlePattern = '(.+)'
 if settings[appName] then
 	titlePattern = settings[appName].titlePattern
+	if settings[appName].appName then
+		appName = settings[appName].appName
+	end
 end
 print(appName, titlePattern)
 
@@ -54,9 +63,16 @@ print("=== windows ===")
 print(hs.inspect.inspect(windows))
 -- do return end
 
+local fileSuffix = appName
+-- print('a', appName, hs.inspect.inspect(settings[cliName]))
+if settings[cliName] and settings[cliName].fileSuffix then
+	fileSuffix = settings[cliName].fileSuffix
+end
+-- print('file suffix', fileSuffix)
+
 if #windows > 0 then
 	local home = os.getenv('HOME')
-	local filename = home .. '/.hammerspoon/.windows.' .. appName
+	local filename = home .. '/.hammerspoon/.windows.' .. fileSuffix
 	print(filename)
 	local file = assert(io.open(filename, 'w'))
 	for i=1,#windows do
