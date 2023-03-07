@@ -144,7 +144,7 @@ function obj:list_window_choices(onlyCurrentApp)
 		end
 		-- print(appName, currentApp)
 		if (not onlyCurrentApp) or (app == currentApp) then
-			print("inserting... " .. w:title() .. " " .. appName)
+			-- print("inserting... " .. w:title() .. " " .. appName)
 			table.insert(windowChoices, {
 				text = w:title() .. "--" .. appName,
 				subText = appName,
