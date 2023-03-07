@@ -100,3 +100,5 @@ hs.hotkey.bind({"alt"}, "x", function()
 	rw:run('iTerm', os.getenv('HOME') .. '/dev/.iterm2.windows.location.txt', '(%a) %(%-?%a+%)')
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
 end)
+
+hs.hotkey.showHotkeys({"cmd", "shift"}, "k")
