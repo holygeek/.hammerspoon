@@ -1,0 +1,70 @@
+#!/opt/local/bin/hs
+-- vim:ft=lua
+
+local settings = {
+	Chrome = {
+		titlePattern = '%[([^%]]+)%]',
+	},
+	iTerm = {
+		titlePattern = '(%a) %(tmux%)',
+	},
+	Slack = {
+		titlePattern = '.+(Slack)$'
+	},
+}
+
+if #_cli.args <= 1 then
+	print("usage: save.pos <appName>")
+	do return end
+end
+local appName = _cli.args[2]
+if appName == 'chrome' then appName = 'Chrome' end
+if appName == 'iterm' then appName = 'iTerm' end
+if appName == 'slack' then appName = 'Slack' end
+
+local titlePattern = '(.+)'
+if settings[appName] then
+	titlePattern = settings[appName].titlePattern
+end
+print(appName, titlePattern)
+
+local windows = {}
+local app = hs.application.find(appName)
+for i, v in ipairs(app:allWindows()) do
+	local title = v:title()
+	if #title > 0 then
+		print('title', title)
+		local i, j, windowName = string.find(title, titlePattern)
+		print(i, j, windowName)
+		if windowName ~= nil and #windowName > 0 then
+			local fr = v:frame()
+			-- print('windowName ' .. windowName)
+			table.insert(windows, {
+				name = windowName,
+				x = fr.x,
+				y = fr.y,
+				w = fr.w,
+				h = fr.h
+			})
+		end
+	end
+end
+
+print("=== windows ===")
+print(hs.inspect.inspect(windows))
+-- do return end
+
+if #windows > 0 then
+	local home = os.getenv('HOME')
+	local filename = home .. '/.hammerspoon/.windows.' .. appName
+	print(filename)
+	local file = assert(io.open(filename, 'w'))
+	for i=1,#windows do
+		local w = windows[i]
+		-- print(w.name, w.x, w.y, w.h, w.w)
+		-- print(string.format("%d %d %d %d %s", w.x, w.y, w.h, w.w, w.name))
+		file:write(string.format("%d %d %d %d %s\n", w.x, w.y, w.w, w.h, w.name))
+	end
+	file:flush()
+	file:close()
+end
