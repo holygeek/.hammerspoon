@@ -112,8 +112,13 @@ function raiseWindow(titlePattern)
 		hs.window.find(titlePattern):focus()
 	end
 end
+-- chrome windows
+require("browser")
+-- vpn
 hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Cisco"):activate() end)
+-- slack
 hs.hotkey.bind({"alt"}, "c", raiseWindow("Slack"))
+-- iterm2 windows
 hs.hotkey.bind({"alt"}, "s", raiseWindow("Default: s %("))
 local iterms = { "a", "f", "g", "h", "i", "k", "l", "r", "v" }
 for i=1,#iterms do
