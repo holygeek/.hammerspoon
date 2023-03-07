@@ -49,7 +49,7 @@ end
 
 function obj:run(appName, titlePattern)
 	local windowPos = {}
-	local filename = os.getenv('HOME') .. '/.hammerspoon/.' .. appName .. '.windows.location.txt'
+	local filename = os.getenv('HOME') .. '/.hammerspoon/.windows.' .. appName
 	for line in io.lines(filename) do
 		local x, y, w, h, windowName = string.match(line, "([+-]?%d+) ([+-]?%d+) ([+-]?%d+) ([+-]?%d+) (.+)")
 		x = tonumber(x)
