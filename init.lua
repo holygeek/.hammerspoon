@@ -1,4 +1,3 @@
-
 hs.ipc.cliInstall("/opt/local", true)
 
 hs.window.animationDuration = 0
@@ -22,24 +21,24 @@ hs.alert.show("Config loaded")
 -- WindowHalfsAndThirds.Spooon
 hs.loadSpoon("WindowHalfsAndThirds")
 local WH3defaultHotkeys = {
-   left_half    = { {"alt", "shift"    }, "Left" },
-   right_half   = { {"alt", "shift"    }, "Right" },
-   top_half     = { {"alt", "shift"    }, "Up" },
-   bottom_half  = { {"alt", "shift"    }, "Down" },
-   third_left   = { {"alt",            }, "Left" },
-   third_right  = { {"alt",            }, "Right" },
-   third_up     = { {"alt",            }, "Up" },
-   third_down   = { {"alt",            }, "Down" },
---    top_left     = { {"ctrl",        "cmd"}, "1" },
---    top_right    = { {"ctrl",        "cmd"}, "2" },
---    bottom_left  = { {"ctrl",        "cmd"}, "3" },
---    bottom_right = { {"ctrl",        "cmd"}, "4" },
---    max_toggle   = { {"ctrl", "alt", "cmd"}, "f" },
---    max          = { {"ctrl", "alt", "cmd"}, "Up" },
---    undo         = { {        "alt", "cmd"}, "z" },
---    center       = { {        "alt", "cmd"}, "c" },
---    larger       = { {        "alt", "cmd", "shift"}, "Right" },
---    smaller      = { {        "alt", "cmd", "shift"}, "Left" },
+	left_half    = { {"alt", "shift"    }, "Left" },
+	right_half   = { {"alt", "shift"    }, "Right" },
+	top_half     = { {"alt", "shift"    }, "Up" },
+	bottom_half  = { {"alt", "shift"    }, "Down" },
+	third_left   = { {"alt",            }, "Left" },
+	third_right  = { {"alt",            }, "Right" },
+	third_up     = { {"alt",            }, "Up" },
+	third_down   = { {"alt",            }, "Down" },
+	--    top_left     = { {"ctrl",        "cmd"}, "1" },
+	--    top_right    = { {"ctrl",        "cmd"}, "2" },
+	--    bottom_left  = { {"ctrl",        "cmd"}, "3" },
+	--    bottom_right = { {"ctrl",        "cmd"}, "4" },
+	--    max_toggle   = { {"ctrl", "alt", "cmd"}, "f" },
+	--    max          = { {"ctrl", "alt", "cmd"}, "Up" },
+	--    undo         = { {        "alt", "cmd"}, "z" },
+	--    center       = { {        "alt", "cmd"}, "c" },
+	--    larger       = { {        "alt", "cmd", "shift"}, "Right" },
+	--    smaller      = { {        "alt", "cmd", "shift"}, "Left" },
 }
 spoon.WindowHalfsAndThirds:bindHotkeys(WH3defaultHotkeys)
 
@@ -71,17 +70,17 @@ hs.hotkey.bind({"alt", "shift"}, "H", function() hs.application.get("Hammerspoon
 -- SkyRocket.spoon
 local SkyRocket = hs.loadSpoon("SkyRocket")
 sky = SkyRocket:new({
-  -- Opacity of resize canvas
-  opacity = 0.3,
-  -- Which modifiers to hold to move a window?
-  -- moveModifiers = {'cmd', 'shift'},
-  moveModifiers = {'alt'},
-  -- Which mouse button to hold to move a window?
-  moveMouseButton = 'left',
-  -- Which modifiers to hold to resize a window?
-  resizeModifiers = {'alt', 'shift'},
-  -- Which mouse button to hold to resize a window?
-  resizeMouseButton = 'left',
+	-- Opacity of resize canvas
+	opacity = 0.3,
+	-- Which modifiers to hold to move a window?
+	-- moveModifiers = {'cmd', 'shift'},
+	moveModifiers = {'alt'},
+	-- Which mouse button to hold to move a window?
+	moveMouseButton = 'left',
+	-- Which modifiers to hold to resize a window?
+	resizeModifiers = {'alt', 'shift'},
+	-- Which mouse button to hold to resize a window?
+	resizeMouseButton = 'left',
 })
 
 function focusLastFocused()
