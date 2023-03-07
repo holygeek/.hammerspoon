@@ -78,8 +78,9 @@ hs.hotkey.bind({"alt"}, "tab", focusLastFocused)
 
 hs.hotkey.bind({"alt"}, "z", function() hs.application.get("zoom.us"):activate(true) end)
 
-local chromeRestore = require("chromerestore")
+local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
-	chromeRestore:run()
-	hs.execute("$HOME/dev/bin/restore.window.positions", true)
+	rw:run('Chrome', os.getenv('HOME') .. '/dev/.chrome.windows.location.txt', '%[([^%]]+)%]')
+	rw:run('iTerm', os.getenv('HOME') .. '/dev/.iterm2.windows.location.txt', '(%a) %(%-?%a+%)')
+	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
 end)

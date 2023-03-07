@@ -10,8 +10,7 @@ function atRightLocation(window, geom)
 		and sz.h == geom.h
 end
 
-function obj:run()
-	local filename = os.getenv('HOME') .. '/dev/.chrome.windows.location.txt'
+function obj:run(appName, filename, titlePattern)
 	local windowPos = {}
 	for line in io.lines(filename) do
 		local x, y, w, h, windowName = string.match(line, "([+-]?%d+) ([+-]?%d+) ([+-]?%d+) ([+-]?%d+) (.+)")
@@ -28,11 +27,11 @@ function obj:run()
 	end
 
 	local chromeWindows = {}
-	local chrome = hs.application.find("Chrome")
+	local chrome = hs.application.find(appName)
 	for i, v in ipairs(chrome:allWindows()) do
 		local title = v:title()
 		if #title > 0 then
-			local i, j, windowName = string.find(title, '%[([^%]]+)%]')
+			local i, j, windowName = string.find(title, titlePattern)
 			if windowName ~= nil and #windowName > 0 then
 				if not atRightLocation(v, windowPos[windowName]) then
 					print('moved ' .. windowName)
