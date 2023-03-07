@@ -1,9 +1,26 @@
-hs.loadSpoon("WindowHalfsAndThirds")
 
 hs.ipc.cliInstall("/opt/local", true)
 
 hs.window.animationDuration = 0
 
+-- Reload config automatically
+function reloadConfig(files)
+	doReload = false
+	for _,file in pairs(files) do
+		if file:sub(-4) == ".lua" then
+			doReload = true
+			break
+		end
+	end
+	if doReload then
+		hs.reload()
+	end
+end
+myWatcher = hs.pathwatcher.new(os.getenv("HOME") .. "/dev/.hammerspoon/", reloadConfig):start()
+hs.alert.show("Config loaded")
+
+-- WindowHalfsAndThirds.Spooon
+hs.loadSpoon("WindowHalfsAndThirds")
 local WH3defaultHotkeys = {
    left_half    = { {"alt", "shift"    }, "Left" },
    right_half   = { {"alt", "shift"    }, "Right" },
@@ -25,22 +42,6 @@ local WH3defaultHotkeys = {
 --    smaller      = { {        "alt", "cmd", "shift"}, "Left" },
 }
 spoon.WindowHalfsAndThirds:bindHotkeys(WH3defaultHotkeys)
-
--- Reload config automatically
-function reloadConfig(files)
-	doReload = false
-	for _,file in pairs(files) do
-		if file:sub(-4) == ".lua" then
-			doReload = true
-			break
-		end
-	end
-	if doReload then
-		hs.reload()
-	end
-end
-myWatcher = hs.pathwatcher.new(os.getenv("HOME") .. "/dev/.hammerspoon/", reloadConfig):start()
-hs.alert.show("Config loaded")
 
 --  // Window switcher
 local switcher  = require('switcher')
