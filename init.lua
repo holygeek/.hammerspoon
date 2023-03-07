@@ -58,14 +58,14 @@ function openswitch(name)
 		end
 	end
 end
-hs.hotkey.bind({"alt", "shift"}, "B", openswitch("Google Chrome"))
-hs.hotkey.bind({"alt", "shift"}, "J", function() hs.execute("sh -c '$HOME/dev/bin/jira $(pbpaste)'", true) end)
-hs.hotkey.bind({"alt", "shift"}, "Q", openswitch("Preview"))
-hs.hotkey.bind({"alt", "shift"}, "S", openswitch("Slack"))
-hs.hotkey.bind({"alt", "shift"}, "X", function() hs.execute("sh -c '$HOME/dev/bin/grab-x $(pbpaste)'", true) end)
-hs.hotkey.bind({"alt", "shift"}, "Z", openswitch("zoom.us"))
+hs.hotkey.bind({"alt", "shift"}, "b", openswitch("Google Chrome"))
+hs.hotkey.bind({"alt", "shift"}, "j", function() hs.execute("sh -c '$HOME/dev/bin/jira $(pbpaste)'", true) end)
+hs.hotkey.bind({"alt", "shift"}, "q", openswitch("Preview"))
+hs.hotkey.bind({"alt", "shift"}, "s", openswitch("Slack"))
+hs.hotkey.bind({"alt", "shift"}, "x", function() hs.execute("sh -c '$HOME/dev/bin/grab-x $(pbpaste)'", true) end)
+hs.hotkey.bind({"alt", "shift"}, "z", openswitch("zoom.us"))
 hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
-hs.hotkey.bind({"alt", "shift"}, "H", function() hs.application.get("Hammerspoon"):activate(true) end)
+hs.hotkey.bind({"alt", "shift"}, "h", function() hs.application.get("Hammerspoon"):activate(true) end)
 
 -- SkyRocket.spoon
 local SkyRocket = hs.loadSpoon("SkyRocket")
