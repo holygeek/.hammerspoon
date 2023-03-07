@@ -63,6 +63,7 @@ function obj:run(appName, filename, titlePattern)
 		}
 	end
 
+	local moved = false
 	local chrome = hs.application.find(appName)
 	for i, v in ipairs(chrome:allWindows()) do
 		local title = v:title()
@@ -71,6 +72,7 @@ function obj:run(appName, filename, titlePattern)
 			if windowName ~= nil and #windowName > 0 then
 				local f = windowPos[windowName]
 				if not atRightLocation(v, f) then
+					moved = 1
 					print(windowName .. ' misplaced')
 					placeWindow(v, f, windowName)
 				else
@@ -78,6 +80,9 @@ function obj:run(appName, filename, titlePattern)
 				end
 			end
 		end
+	end
+	if not moved then
+		print(appName .. ' window locations not changed')
 	end
 end
 
