@@ -107,6 +107,12 @@ hs.hotkey.showHotkeys({"cmd", "shift"}, "k")
 
 -- alt+key
 local iterms = { "s", "a", "f", "g", "h", "i", "k", "l", "r", "v" }
+function centerFrontmostWindow()
+	local w = hs.window.frontmostWindow()
+	if w then
+		w:setFrame(hs.geometry.new(2987.0,-397.0,1454.0,1368.0))
+	end
+end
 function raiseWindow(titlePattern)
 	return function()
 		hs.window.find(titlePattern):focus()
@@ -135,6 +141,8 @@ for i=1,#iterms do
 	local termName = iterms[i]
 	hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. '$'))
 end
+-- move frontmost window to center display
+hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
 
 -- hs.console.clearConsole()
 -- hs.hints.windowHints(hs.window.focusedWindow():application():allWindows())
