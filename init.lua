@@ -99,6 +99,7 @@ local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
 	rw:run('Chrome', '%[([^%]]+)%]')
 	rw:run('iTerm', '(%a) %(%-?%a+%)')
+	rw:run('zoom', '(.+)')
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
 end)
 
