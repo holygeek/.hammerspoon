@@ -105,6 +105,21 @@ end)
 
 hs.hotkey.showHotkeys({"cmd", "shift"}, "k")
 
+-- alt+key
+function raiseWindow(titlePattern)
+	return function()
+		hs.window.find(titlePattern):focus()
+	end
+end
+hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Cisco"):activate() end)
+hs.hotkey.bind({"alt"}, "c", raiseWindow("Slack"))
+hs.hotkey.bind({"alt"}, "s", raiseWindow("Default: s %("))
+local iterms = { "a", "f", "g", "h", "i", "k", "l", "r", "v" }
+for i=1,#iterms do
+	local termName = iterms[i]
+	hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. ' %('))
+end
+
 -- hs.console.clearConsole()
 -- hs.hints.windowHints(hs.window.focusedWindow():application():allWindows())
 -- hs.hints.windowHints()
