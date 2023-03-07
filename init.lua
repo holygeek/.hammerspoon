@@ -2,15 +2,17 @@ hs.loadSpoon("WindowHalfsAndThirds")
 
 hs.ipc.cliInstall("/opt/local", true)
 
+hs.window.animationDuration = 0
+
 local WH3defaultHotkeys = {
-   left_half    = { {"cmd"             }, "Left" },
-   right_half   = { {"cmd"             }, "Right" },
-   top_half     = { {"cmd"             }, "Up" },
-   bottom_half  = { {"cmd"             }, "Down" },
-   third_left   = { {"alt"              }, "Left" },
-   third_right  = { {"alt"              }, "Right" } -- ,
---   third_up     = { {"ctrl", "alt"       }, "Up" },
---   third_down   = { {"ctrl", "alt"       }, "Down" },
+   left_half    = { {"alt", "shift"    }, "Left" },
+   right_half   = { {"alt", "shift"    }, "Right" },
+   top_half     = { {"alt", "shift"    }, "Up" },
+   bottom_half  = { {"alt", "shift"    }, "Down" },
+   third_left   = { {"alt",            }, "Left" },
+   third_right  = { {"alt",            }, "Right" },
+   third_up     = { {"alt",            }, "Up" },
+   third_down   = { {"alt",            }, "Down" },
 --    top_left     = { {"ctrl",        "cmd"}, "1" },
 --    top_right    = { {"ctrl",        "cmd"}, "2" },
 --    bottom_left  = { {"ctrl",        "cmd"}, "3" },
@@ -57,54 +59,24 @@ function openswitch(name)
 	end
 end
 hs.hotkey.bind({"alt", "shift"}, "B", openswitch("Google Chrome"))
-hs.hotkey.bind({"alt", "shift"}, "S", openswitch("Slack"))
-hs.hotkey.bind({"alt", "shift"}, "Z", openswitch("zoom.us"))
-hs.hotkey.bind({"alt", "shift"}, "Q", openswitch("Preview"))
-hs.hotkey.bind({"alt", "shift"}, "X", function() hs.execute("sh -c '$HOME/dev/bin/grab-x $(pbpaste)'", true) end)
 hs.hotkey.bind({"alt", "shift"}, "J", function() hs.execute("sh -c '$HOME/dev/bin/jira $(pbpaste)'", true) end)
+hs.hotkey.bind({"alt", "shift"}, "Q", openswitch("Preview"))
+hs.hotkey.bind({"alt", "shift"}, "S", openswitch("Slack"))
+hs.hotkey.bind({"alt", "shift"}, "X", function() hs.execute("sh -c '$HOME/dev/bin/grab-x $(pbpaste)'", true) end)
+hs.hotkey.bind({"alt", "shift"}, "Z", openswitch("zoom.us"))
+hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
+hs.hotkey.bind({"alt", "shift"}, "H", function() hs.application.get("Hammerspoon"):activate(true) end)
 
 function focusLastFocused()
 	local wf = hs.window.filter
 	local lastFocused = wf.defaultCurrentSpace:getWindows(wf.sortByFocusedLast)
-	if #lastFocused > 0 then lastFocused[1]:focus() end
+	-- print('lastFocused', lastFocused[2]:title())
+	if #lastFocused > 1 then lastFocused[2]:focus() end
 end
-
-function raisewindow(choice)
-	if not choice then focusLastFocused(); return end
-	print('raisewindow')
-	print(choice)
-	-- hs.pasteboard.setContents(choice["chars"])
-	-- focusLastFocused()
-	-- hs.eventtap.keyStrokes(hs.pasteboard.getContents())
-end
-
-hs.hotkey.bind({"alt"}, "space", function()
-	local chooser = hs.chooser.new(raisewindow)
-	chooser:choices({
-		{ ["text"] = "one" },
-		{ ["text"] = "two" },
-	})
-	-- TODO chooser:searchSubText(true)
-
-	-- local app = hs.application.get("zoom.us")
-	-- print(app)
-	-- app:activate(true)
-end)
-
--- ======================================= Utilities
--- // disable window animations
-hs.window.animationDuration = 0
+hs.hotkey.bind({"alt"}, "tab", focusLastFocused)
 
 
-hs.hotkey.bind({"alt", "shift"}, "H", function()
-	hs.application.get("Hammerspoon"):activate(true)
-end)
-
-hs.hotkey.bind({"alt"}, "z", function()
-	local app = hs.application.get("zoom.us")
-	print(app)
-	app:activate(true)
-end)
+hs.hotkey.bind({"alt"}, "z", function() hs.application.get("zoom.us"):activate(true) end)
 
 local chromeRestore = require("chromerestore")
 hs.hotkey.bind({"alt"}, "x", function()

@@ -234,16 +234,10 @@ function obj:previousWindow(onlyCurrentApp)
            end
 end
 
--- select any other window
--- why doesnt' this work?
-hs.hotkey.bind({"ctrl"}, "space", function()
-      obj:selectWindow(false)
-end)
-
--- select any window for the same application
-hs.hotkey.bind({"alt", "shift"}, "b", function()
-      obj:selectWindow(true)
-end)
+-- -- select any window for the same application
+-- hs.hotkey.bind({"alt", "shift"}, "b", function()
+--       obj:selectWindow(true)
+-- end)
 
 -- cycles through all widows of the frontmost app.
 function obj:switcherfunc()
