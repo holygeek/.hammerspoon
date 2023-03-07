@@ -47,9 +47,18 @@ function placeWindow(v, f, windowName)
 	print('gave up on ' .. windowName .. ' after ' .. nAttempts .. ' attempts')
 end
 
+local function starts_with(str, start)
+   return str:sub(1, #start) == start
+end
+
+local function ends_with(str, ending)
+   return ending == "" or str:sub(-#ending) == ending
+end
+
 function obj:run(appName, titlePattern)
 	local windowPos = {}
 	local filename = os.getenv('HOME') .. '/.hammerspoon/.windows.' .. appName
+	local hasMainWindow = false
 	for line in io.lines(filename) do
 		if string.sub(line, 1, 1) ~= '#' then
 			local x, y, w, h, windowName = string.match(line, "([+-]?%d+) ([+-]?%d+) ([+-]?%d+) ([+-]?%d+) (.+)")
@@ -57,6 +66,9 @@ function obj:run(appName, titlePattern)
 			y = tonumber(y)
 			h = tonumber(h)
 			w = tonumber(w)
+			if ends_with(windowName, "=main") then
+				hasMainWindow = true
+			end
 			windowPos[windowName] = {
 				x = x,
 				y = y,
@@ -67,11 +79,18 @@ function obj:run(appName, titlePattern)
 	end
 
 	local moved = false
-	local chrome = hs.application.find(appName)
-	for i, v in ipairs(chrome:allWindows()) do
+	local app = hs.application.find(appName)
+	local mainWindow = nil
+	if hasMainWindow then
+		mainWindow = app:mainWindow()
+	end
+	for i, v in ipairs(app:allWindows()) do
 		local title = v:title()
 		if #title > 0 then
 			local i, j, windowName = string.find(title, titlePattern)
+			if hasMainWindow and mainWindow == v then
+				windowName = windowName .. '=main'
+			end
 			if windowName ~= nil and #windowName > 0 then
 				local f = windowPos[windowName]
 				if not f then
