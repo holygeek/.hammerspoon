@@ -47,8 +47,9 @@ function placeWindow(v, f, windowName)
 	print('gave up on ' .. windowName .. ' after ' .. nAttempts .. ' attempts')
 end
 
-function obj:run(appName, filename, titlePattern)
+function obj:run(appName, titlePattern)
 	local windowPos = {}
+	local filename = os.getenv('HOME') .. '/.hammerspoon/.' .. appName .. '.windows.location.txt'
 	for line in io.lines(filename) do
 		local x, y, w, h, windowName = string.match(line, "([+-]?%d+) ([+-]?%d+) ([+-]?%d+) ([+-]?%d+) (.+)")
 		x = tonumber(x)
