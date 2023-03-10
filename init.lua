@@ -71,7 +71,7 @@ hs.hotkey.bind({"alt", "shift"}, "h", function() hs.application.get("Hammerspoon
 local SkyRocket = hs.loadSpoon("SkyRocket")
 sky = SkyRocket:new({
 	-- Opacity of resize canvas
-	opacity = 0.3,
+	opacity = 0.6,
 	-- Which modifiers to hold to move a window?
 	-- moveModifiers = {'cmd', 'shift'},
 	moveModifiers = {'alt'},
