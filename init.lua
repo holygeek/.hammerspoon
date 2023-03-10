@@ -133,8 +133,73 @@ function startTmux()
 		hs.eventtap.keyStrokes('tm ' .. termName .. '\n')
 	end
 end
+-- https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
+function spairs(t, order)
+    -- collect the keys
+    local keys = {}
+    for k in pairs(t) do keys[#keys+1] = k end
+
+    -- if order function given, sort by it by passing the table and keys a, b,
+    -- otherwise just sort the keys
+    if order then
+        table.sort(keys, function(a,b) return order(t, a, b) end)
+    else
+        table.sort(keys)
+    end
+
+    -- return the iterator function
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
+end
+local otherRaised = 1
+function raiseOther()
+	local a = hs.application.find('chrome')
+	local w = a:allWindows()
+	local others = {}
+	local j = 1
+	for i=1,#w do
+		local title = w[i]:title()
+		if title and #title > 0 then
+			local name = string.find(title, '%[([^%]]+)%]')
+			if name then
+				-- could be named chrome window, unless it's a ticket, then add to others
+				local jiraticket = string.find(name, '%[%u+-%d+%]')
+				if jiraticket then
+					others[title] = w[i]
+					-- table.insert(others, w[i])
+				end
+			else
+				others[title] = w[i]
+				-- table.insert(others, w[i])
+			end
+		end
+	end
+	-- sort others table alphabetically by the title
+	local toselect = {}
+	local j = 1
+	for title, w in spairs(others) do
+		toselect[j] = w
+		j = j + 1
+	end
+	otherRaised = otherRaised + 1
+	if otherRaised > #toselect then
+		otherRaised = 1
+	end
+	if #toselect > 0 then
+		local w = toselect[otherRaised]
+		print('other: raising ' .. w:title())
+		w:focus()
+	end
+
+end
 -- chrome windows
 require("browser")
+hs.hotkey.bind({"alt"}, "o",  raiseOther)
 -- vpn
 hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Cisco"):activate() end)
 -- slack
