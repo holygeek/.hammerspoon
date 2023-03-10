@@ -107,7 +107,7 @@ hs.hotkey.bind({"alt"}, "x", function()
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
 end)
 
-hs.hotkey.showHotkeys({"cmd", "shift"}, "k")
+hs.hotkey.showHotkeys({"cmd", "alt"}, "k")
 
 -- alt+key
 local iterms = { "s", "a", "f", "g", "h", "i", "k", "l", "r", "v" }
