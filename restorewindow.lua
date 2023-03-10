@@ -55,9 +55,11 @@ local function ends_with(str, ending)
    return ending == "" or str:sub(-#ending) == ending
 end
 
-function obj:run(appName, titlePattern)
+function obj:run(appName, titlePattern, fileSuffix)
 	local windowPos = {}
-	local filename = os.getenv('HOME') .. '/.hammerspoon/.windows.' .. appName
+	fileSuffix = fileSuffix or appName
+	print('file suffix', fileSuffix)
+	local filename = os.getenv('HOME') .. '/.hammerspoon/.windows.' .. fileSuffix
 	local hasMainWindow = false
 	for line in io.lines(filename) do
 		if string.sub(line, 1, 1) ~= '#' then
