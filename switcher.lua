@@ -172,15 +172,11 @@ windowChooser:bgDark(true)
 function obj:selectWindow(onlyCurrentApp)
    local windowChoices = obj:list_window_choices(onlyCurrentApp)
    if #windowChoices == 0 then
-      -- print("A")
       if onlyCurrentApp then
-         -- print("B")
          hs.alert.show("no other window for this application ")
       else
-         -- print("C")
          hs.alert.show("no other window available ")
       end
-      -- print("D")
       return
    end
    -- print("E")
