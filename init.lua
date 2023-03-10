@@ -67,7 +67,7 @@ hs.hotkey.bind({"alt", "shift"}, "z", openswitch("zoom.us"))
 hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
 hs.hotkey.bind({"alt", "shift"}, "h", function() hs.application.get("Hammerspoon"):activate(true) end)
 
--- SkyRocket.spoon
+-- SkyRocket.spoon moves window with alt+click
 local SkyRocket = hs.loadSpoon("SkyRocket")
 sky = SkyRocket:new({
 	-- Opacity of resize canvas
