@@ -111,6 +111,7 @@ hs.hotkey.showHotkeys({"cmd", "alt"}, "k")
 
 -- alt+key
 local iterms = { "s", "a", "f", "g", "h", "i", "k", "l", "r", "v" }
+-- todo alt+n and alt+p
 function centerFrontmostWindow()
 	local w = hs.window.frontmostWindow()
 	if w then
