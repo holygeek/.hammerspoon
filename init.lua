@@ -102,8 +102,8 @@ hs.hotkey.bind({"alt"}, "z", function() hs.application.get("zoom.us"):activate(t
 local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
 	if #hs.screen.allScreens() == 3 then
-		rw:run('Chrome', '%[([^%]]+)%]')
 		rw:run('iTerm', '^(%a)$')
+		rw:run('Chrome', '%[([^%]]+)%]')
 		rw:run('zoom', '(.+)')
 		rw:run('Slack', '.+(Slack)$')
 	else
