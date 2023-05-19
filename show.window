@@ -1,0 +1,23 @@
+#! /opt/local/bin/hs
+local app, windows;
+
+local name = _cli.args[2]
+
+app = hs.application.find(name)
+if not app then
+	print('no app found', name)
+	do return end
+end
+
+local mw = app:mainWindow()
+windows = app:allWindows()
+
+for i=1,#windows do
+	local w = windows[i]
+	local f = w:frame()
+	local main = '       '
+	if mw == w then
+		main = ' (main)'
+	end
+	print(string.format("%4d %4d %4d %4d", f.x, f.y, f.w, f.h) .. main .. ' ' .. w:title() .. ' ')
+end

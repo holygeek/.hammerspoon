@@ -1,0 +1,42 @@
+#!/opt/local/bin/hs
+-- vim:ft=lua
+
+-- print(_cli.args[2])
+-- do return end
+
+local appName = "iTerm"
+local windows = {}
+local app = hs.application.find(appName)
+for i, v in ipairs(app:allWindows()) do
+	local title = v:title()
+	-- print('Title: ' .. title)
+	if #title > 0 then
+		local i, j, windowName = string.find(title, '(%a) %(tmux%)')
+		if windowName ~= nil and #windowName > 0 then
+			local tl = v:topLeft()
+			local sz = v:size()
+			-- print('windowName ' .. windowName)
+			table.insert(windows, {
+				name = windowName,
+				x = tl.x,
+				y = tl.y,
+				w = sz.w,
+				h = sz.h
+			})
+		end
+	end
+end
+
+if #windows > 0 then
+	local home = os.getenv('HOME')
+	local filename = home .. '/.hammerspoon/.windows.' .. appName
+	local file = assert(io.open(filename, 'w'))
+	for i=1,#windows do
+		local w = windows[i]
+		-- print(w.name, w.x, w.y, w.h, w.w)
+		-- print(string.format("%d %d %d %d %s", w.x, w.y, w.h, w.w, w.name))
+		file:write(string.format("%d %d %d %d %s\n", w.x, w.y, w.w, w.h, w.name))
+	end
+	file:flush()
+	file:close()
+end
