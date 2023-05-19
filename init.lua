@@ -109,6 +109,7 @@ hs.hotkey.bind({"alt"}, "x", function()
 	else
 		rw:run('iTerm', '^(%a)$', 'iTerm.laptop')
 	end
+	hs.alert.show("Done")
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
 end)
 
