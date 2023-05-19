@@ -164,27 +164,41 @@ function spairs(t, order)
 end
 local otherRaised = 1
 function raiseOther()
-	local a = hs.application.find('chrome')
-	local w = a:allWindows()
+	local w = hs.window.allWindows()
 	local others = {}
 	local j = 1
 	for i=1,#w do
+		local app = w[i]:application()
+		if not app then goto continue end
+		if app:name() == 'iTerm2' then goto continue end
+
 		local title = w[i]:title()
+		--DEBUG print('title', title)
 		if title and #title > 0 then
-			local name = string.find(title, '%[([^%]]+)%]')
-			if name then
-				-- could be named chrome window, unless it's a ticket, then add to others
-				local jiraticket = string.find(name, '%[%u+-%d+%]')
-				if jiraticket then
+			if app:name() == 'Google Chrome' then
+				local name = string.find(title, '%[([^%]]+)%]')
+				if name then
+					-- could be named chrome window, unless it's a ticket, then add to others
+					local jiraticket = string.find(name, '%[%u+-%d+%]')
+					if jiraticket then
+						others[title] = w[i]
+						--DEBUG print("  ADDED")
+						-- table.insert(others, w[i])
+					end
+				else
 					others[title] = w[i]
+					--DEBUG print("  ADDED")
 					-- table.insert(others, w[i])
 				end
 			else
 				others[title] = w[i]
-				-- table.insert(others, w[i])
+				--DEBUG print("  ADDED")
 			end
 		end
+		::continue::
 	end
+
+
 	-- sort others table alphabetically by the title
 	local toselect = {}
 	local j = 1
