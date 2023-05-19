@@ -66,6 +66,11 @@ hs.hotkey.bind({"alt", "shift"}, "x", function() hs.execute("sh -c '$HOME/dev/bi
 hs.hotkey.bind({"alt", "shift"}, "z", openswitch("zoom.us"))
 hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
 hs.hotkey.bind({"alt", "shift"}, "h", function() hs.application.get("Hammerspoon"):activate(true) end)
+-- screencapture to ram
+function captureToRam()
+	hs.execute("screencapture -c -i")
+end
+hs.hotkey.bind({"alt", "shift"}, "4", captureToRam)
 
 -- SkyRocket.spoon moves window with alt+click
 local SkyRocket = hs.loadSpoon("SkyRocket")
