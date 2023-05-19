@@ -82,6 +82,9 @@ function obj:run(appName, titlePattern, fileSuffix)
 
 	local moved = false
 	local app = hs.application.find(appName)
+	if not app then
+		return
+	end
 	local mainWindow = nil
 	if hasMainWindow then
 		mainWindow = app:mainWindow()
