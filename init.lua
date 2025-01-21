@@ -345,6 +345,11 @@ for i=1,#iterms do
 	-- hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. '$'))
 	hs.hotkey.bind({"alt"}, termName, raiseAppWindow('iTerm', termName))
 end
+
+-- 2025-01-06 00:06:16: no window found matching ghostty.b
+-- ran with "~/bin/ghostty.run b"
+-- hs.hotkey.bind({"alt"}, "b", raiseAppWindow('Ghostty', 'ghostty.b'))
+
 -- move frontmost window to center display
 hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
 
