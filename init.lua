@@ -356,3 +356,8 @@ hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
 -- hs.console.clearConsole()
 -- hs.hints.windowHints(hs.window.focusedWindow():application():allWindows())
 -- hs.hints.windowHints()
+-- Timer
+-- hs.timer.doAfter(2, function() hs.alert.show('foo bar') end
+-- Move mouse
+-- hs.mouse.setAbsolutePosition({x=100,y=100})
+-- hs.mouse.setAbsolutePosition({x=cursorLocation.x+100,y=cursorLocation.y+100})
