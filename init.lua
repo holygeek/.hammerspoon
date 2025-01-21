@@ -58,7 +58,7 @@ function openswitch(name)
 		end
 	end
 end
-hs.hotkey.bind({"alt", "shift"}, "b", openswitch("Google Chrome"))
+-- hs.hotkey.bind({"alt", "shift"}, "b", openswitch("Google Chrome"))
 hs.hotkey.bind({"alt", "shift"}, "j", function() hs.execute("sh -c '$HOME/dev/bin/jira $(pbpaste)'", true) end)
 hs.hotkey.bind({"alt", "shift"}, "q", openswitch("Preview"))
 hs.hotkey.bind({"alt", "shift"}, "s", openswitch("Slack"))
