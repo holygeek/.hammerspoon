@@ -19,5 +19,5 @@ for i=1,#windows do
 	if mw == w then
 		main = ' (main)'
 	end
-	print(string.format("%4d %4d %4d %4d", f.x, f.y, f.w, f.h) .. main .. ' ' .. w:title() .. ' ')
+	print(string.format("%s %4d %4d %4d %4d", app:name(), f.x, f.y, f.w, f.h) .. main .. ' ' .. w:title() .. ' ')
 end

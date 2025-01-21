@@ -24,7 +24,7 @@ end
 
 if #chromeWindows > 0 then
 	local home = os.getenv('HOME')
-	local filename = home .. '/.hammerspoon/.windows.' .. appName
+	local filename = home .. '/.hammerspoon/.windows.' .. appName .. '.new'
 	local file = assert(io.open(filename, 'w'))
 	for i=1,#chromeWindows do
 		local w = chromeWindows[i]
