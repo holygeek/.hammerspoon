@@ -115,9 +115,16 @@ end)
 
 local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
-	if #hs.screen.allScreens() == 3 then
-		rw:run('iTerm', '^(%a)$')
-		rw:run('Chrome', '%[([^%]]+)%]')
+	-- if #hs.screen.allScreens() == 3 then
+	local nScreen = #hs.screen.allScreens()
+	if nScreen >= 2 then
+		if nScreen == 3 then
+			rw:run('iTerm', '^(%a)$', 'iTerm.3.monitors.home')
+			rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.3.monitors.home')
+		else
+			rw:run('iTerm', '^(%a)$', 'iTerm.2.monitors.office')
+			rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.2.monitors.office')
+		end
 		rw:run('zoom', '(.+)')
 		rw:run('Slack', '.+(Slack)$')
 	else
@@ -138,19 +145,78 @@ function centerFrontmostWindow()
 		w:setFrame(hs.geometry.new(2987.0,-397.0,1454.0,1368.0))
 	end
 end
+function raiseWindowTitlePattern(appName, titlePattern)
+	return function()
+		-- local start = os.clock()
+		local app = hs.application.find(appName)
+		if not app then
+			print(appName, "no such app")
+			return
+		end
+		local w = app:findWindow(titlePattern)
+		if not w then
+			print(appName, titlePattern, "no such window")
+			return
+		end
+		w:focus()
+		-- print(os.clock() - start)
+		--  local cmd = "cat $HOME/tmp/chrome.windows|grep '\\[" .. name .. "\\]'|grep -o '[0-9]*'"
+
+		--  local windowid, status, exitType, rc = hs.execute(cmd)
+		--  -- hs.alert.show(output)
+		--  print("windowid", windowid)
+
+		--  -- Tue 19 Nov 2024 22:25:43 +08 doesn't work. hypothesis: chrome-cli windowid  not same
+		--  local w = hs.window.get(tonumber(windowid))
+
+		-- print("output", output)
+		-- print("status", status, "exitType", exitType, "rc", rc)
+
+		-- local w = hs.window.find(titlePattern)
+		-- if w then
+		-- 	w:focus()
+		-- else
+		-- 	print("no Chrome window found matching " .. name .. ". Check ~/tmp/chrome.dinwos?")
+		-- end
+	end
+end
 function raiseWindow(titlePattern)
 	return function()
-		hs.window.find(titlePattern):focus()
+		local start = os.clock()
+		local w = hs.window.find(titlePattern)
+		if w then
+			w:focus()
+		-- else print("no window found matching " ..titlePattern)
+		end
+		print(os.clock() - start)
+	end
+end
+function raiseAllWindow(appname)
+	return function()
+		local apps = {hs.application.find(appname)}
+		for i=1,#apps do
+			apps[i]:activate(true)
+		end
 	end
 end
 function raiseIterm(termName)
-	hs.window.find('^' .. termName .. '$'):focus()
+	local w = hs.window.find('^' .. termName .. '$')
+	if w then
+		w:focus()
+		return true
+	else
+		print("could not find ^" .. termName .. "$")
+		return false
+	end
 end
 function startTmux()
 	for i=1,#iterms do
 		local termName = iterms[i]
-		raiseIterm(termName)
-		hs.eventtap.keyStrokes('tm ' .. termName .. '\n')
+		if raiseIterm(termName) then
+			hs.eventtap.keyStrokes('tm ' .. termName .. '\n')
+		else
+			print("could not raise " .. termName)
+		end
 	end
 end
 -- https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
@@ -229,21 +295,55 @@ function raiseOther()
 		print('other: raising ' .. w:title())
 		w:focus()
 	end
-
 end
+
+-- alt + key
+-- =========
 -- chrome windows
 require("browser")
 hs.hotkey.bind({"alt"}, "o",  raiseOther)
 -- vpn
-hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Cisco"):activate() end)
+-- hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Cisco"):activate() end)
+hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Zscaler"):activate() end)
 -- slack
-hs.hotkey.bind({"alt"}, "c", raiseWindow("Slack"))
+hs.hotkey.bind({"alt"}, "c", raiseAllWindow("Slack"))
+-- zoom
+hs.hotkey.bind({"alt"}, "z", raiseAllWindow("zoom.us"))
+-- hs.hotkey.bind({"alt"}, "z", function()
+-- 	local zooms = {hs.application.find("zoom.us")}
+-- 	for i=1,#zooms do
+-- 		zooms[i]:activate(true)
+-- 	end
+-- end)
+
+-- Notes window
+hs.hotkey.bind({"alt"}, "n", raiseAllWindow('Notes'))
+
+-- raiseWindow seems to be very slow due to hs.window.find
+function raiseAppWindow(appName, title)
+	return function()
+		-- local start = os.clock()
+		local app = hs.appfinder.appFromName(appName)
+		if not app then
+			print("no app found for " .. appName)
+			return
+		end
+		local w = app:getWindow(title)
+		if w then
+			w:focus()
+		else
+			print("no window found matching " .. title)
+		end
+		-- print(os.clock() - start)
+	end
+end
 -- iterm2 windows
 -- ==============
 hs.hotkey.bind({"cmd", "alt"}, "t", startTmux)
 for i=1,#iterms do
 	local termName = iterms[i]
-	hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. '$'))
+	-- hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. '$'))
+	hs.hotkey.bind({"alt"}, termName, raiseAppWindow('iTerm', termName))
 end
 -- move frontmost window to center display
 hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
