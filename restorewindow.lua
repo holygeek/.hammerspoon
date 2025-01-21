@@ -30,7 +30,7 @@ end
 function placeWindow(v, f, windowName)
 	-- v:setTopLeft({ x = f.x, y = f.y })
 	-- v:setSize({ w = f.w, h = f.h })
-	local nAttempts = 20
+	local nAttempts = 1 -- 20
 	for i=1,nAttempts do -- try 10 times
 		print(' ' .. i .. ' moving ' .. windowName .. string.format(" w:setFrame(hs.geometry.new(%d, %d, %d, %d)", f.x, f.y, f.w, f.h))
 		v:setFrame(hs.geometry.new(f.x, f.y, f.w, f.h))
@@ -68,15 +68,17 @@ function obj:run(appName, titlePattern, fileSuffix)
 			y = tonumber(y)
 			h = tonumber(h)
 			w = tonumber(w)
-			if ends_with(windowName, "=main") then
-				hasMainWindow = true
+			if windowName then
+				if ends_with(windowName, "=main") then
+					hasMainWindow = true
+				end
+				windowPos[windowName] = {
+					x = x,
+					y = y,
+					w = w,
+					h = h
+				}
 			end
-			windowPos[windowName] = {
-				x = x,
-				y = y,
-				w = w,
-				h = h
-			}
 		end
 	end
 
