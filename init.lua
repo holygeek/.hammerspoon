@@ -66,6 +66,15 @@ hs.hotkey.bind({"alt", "shift"}, "x", function() hs.execute("sh -c '$HOME/dev/bi
 hs.hotkey.bind({"alt", "shift"}, "z", openswitch("zoom.us"))
 hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
 hs.hotkey.bind({"alt", "shift"}, "h", function() hs.application.get("Hammerspoon"):activate(true) end)
+function twoWindow()
+	local ws = hs.window.orderedWindows()
+	print('1', ws[2]:title(), ws[1]:role())
+	print('2', ws[3]:title(), ws[2]:role())
+	hs.grid.set(ws[2], hs.geometry(0, 0, 0.5, 0))
+	hs.grid.set(ws[3], hs.geometry(0.5, 0, 0.5, 0))
+end
+hs.hotkey.bind({"ctrl", "alt"}, "2", twoWindow)
+
 -- screencapture to ram
 function captureToRam()
 	hs.execute("screencapture -c -i")
