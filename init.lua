@@ -420,3 +420,48 @@ end
 
 -- Single hotkey for toggling
 hs.hotkey.bind({"alt"}, "2", toggleLastTwoWindows)
+
+
+-- Add global map to store original window frames
+local gOriginalFrames = {}
+-- Resize current window to full width of screen
+hs.hotkey.bind({"alt","shift"}, "w", function()
+    local w = hs.window.frontmostWindow()
+    if not w then
+        return
+    end
+
+    -- Get window ID and current frame
+    local windowId = w:id()
+    local wFrame = w:frame()
+    local screen = w:screen()
+    local frame = screen:frame()
+
+    -- If window is not full width
+    if wFrame.w ~= frame.w then
+        -- Store original frame in map
+        gOriginalFrames[windowId] = wFrame:copy()
+
+        -- Resize to full width
+        w:setFrame({
+            x = frame.x,
+            y = wFrame.y,
+            w = frame.w,
+            h = wFrame.h
+        })
+    else
+        -- Restore to original width if we have stored state
+        if gOriginalFrames[windowId] then
+            w:setFrame(gOriginalFrames[windowId])
+            gOriginalFrames[windowId] = nil  -- Clear stored state
+        else
+            -- Default to half width if no stored state
+            w:setFrame({
+                x = frame.x,
+                y = wFrame.y,
+                w = frame.w / 2,
+                h = wFrame.h
+            })
+        end
+    end
+end)
