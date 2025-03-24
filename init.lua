@@ -307,6 +307,8 @@ hs.hotkey.bind({"alt"}, "o",  raiseOther)
 hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Zscaler"):activate() end)
 -- slack
 hs.hotkey.bind({"alt"}, "c", raiseAllWindow("Slack"))
+-- cursor
+hs.hotkey.bind({"alt"}, "b", raiseAllWindow("Cursor"))
 -- zoom
 hs.hotkey.bind({"alt"}, "z", raiseAllWindow("zoom.us"))
 -- hs.hotkey.bind({"alt"}, "z", function()
