@@ -361,3 +361,60 @@ hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
 -- Move mouse
 -- hs.mouse.setAbsolutePosition({x=100,y=100})
 -- hs.mouse.setAbsolutePosition({x=cursorLocation.x+100,y=cursorLocation.y+100})
+
+-- Add global variables with 'g' prefix
+local gWindowsArranged = false
+local gLastWindow1 = nil
+local gLastWindow2 = nil
+local gLastWindowFrame1 = nil
+local gLastWindowFrame2 = nil
+
+function toggleLastTwoWindows()
+    -- Handle restore case first
+    if gWindowsArranged then
+        if not (gLastWindow1 and gLastWindow2 and gLastWindowFrame1 and gLastWindowFrame2) then
+            return
+        end
+
+        gLastWindow1:setFrame(gLastWindowFrame1)
+        gLastWindow2:setFrame(gLastWindowFrame2)
+        gWindowsArranged = false
+        return
+    end
+
+    -- Handle arrange case
+    local w = hs.window.orderedWindows()
+    if #w < 2 then
+        return
+    end
+
+    -- Store the window references and their original frames
+    gLastWindow1 = w[1]
+    gLastWindow2 = w[2]
+    gLastWindowFrame1 = w[1]:frame()
+    gLastWindowFrame2 = w[2]:frame()
+
+    -- Get the screen of the first window
+    local screen = w[1]:screen()
+    local frame = screen:frame()
+
+    -- Set exact frame dimensions for each window
+    w[1]:setFrame({
+        x = frame.x,
+        y = frame.y,
+        w = frame.w / 2,
+        h = frame.h * 0.7
+    })
+
+    w[2]:setFrame({
+        x = frame.x + frame.w / 2,
+        y = frame.y,
+        w = frame.w / 2,
+        h = frame.h * 0.7
+    })
+
+    gWindowsArranged = true
+end
+
+-- Single hotkey for toggling
+hs.hotkey.bind({"alt"}, "2", toggleLastTwoWindows)
