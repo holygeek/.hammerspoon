@@ -364,59 +364,132 @@ hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
 -- hs.mouse.setAbsolutePosition({x=100,y=100})
 -- hs.mouse.setAbsolutePosition({x=cursorLocation.x+100,y=cursorLocation.y+100})
 
--- Add global variables with 'g' prefix
-local gWindowsArranged = false
-local gLastWindow1 = nil
-local gLastWindow2 = nil
-local gLastWindowFrame1 = nil
-local gLastWindowFrame2 = nil
+-- Add global maps for window pairing and state
+local gWindowsPaired = {}      -- Maps window ID to its paired window ID
+local gWindowsArranged = {}    -- Maps window ID to arranged state (true/false)
+local gOriginalFrames = {}     -- Maps window ID to original frame
 
 function toggleLastTwoWindows()
-    -- Handle restore case first
-    if gWindowsArranged then
-        if not (gLastWindow1 and gLastWindow2 and gLastWindowFrame1 and gLastWindowFrame2) then
+    local w = hs.window.frontmostWindow()
+    if not w then
+        return
+    end
+
+    local currentId = w:id()
+
+    -- Check if current window is already paired
+    if gWindowsPaired[currentId] then
+        local pairedId = gWindowsPaired[currentId]
+        local pairedWindow = hs.window.get(pairedId)
+
+        -- Verify paired window still exists
+        if not pairedWindow then
+            -- Clean up orphaned pairing
+            gWindowsPaired[currentId] = nil
+            gWindowsArranged[currentId] = nil
+            gOriginalFrames[currentId] = nil
             return
         end
 
-        gLastWindow1:setFrame(gLastWindowFrame1)
-        gLastWindow2:setFrame(gLastWindowFrame2)
-        gWindowsArranged = false
-        return
+        -- Toggle arrangement state
+        if gWindowsArranged[currentId] then
+            -- Restore original positions
+            w:setFrame(gOriginalFrames[currentId])
+            pairedWindow:setFrame(gOriginalFrames[pairedId])
+            gWindowsArranged[currentId] = false
+            gWindowsArranged[pairedId] = false
+        else
+            -- Arrange side by side on the current window's screen
+            local screen = w:screen()
+            local frame = screen:frame()
+
+            w:setFrame({
+                x = frame.x,
+                y = frame.y,
+                w = frame.w / 2,
+                h = frame.h * 0.7
+            })
+
+            pairedWindow:setFrame({
+                x = frame.x + frame.w / 2,
+                y = frame.y,
+                w = frame.w / 2,
+                h = frame.h * 0.7
+            })
+
+            gWindowsArranged[currentId] = true
+            gWindowsArranged[pairedId] = true
+        end
+    else
+        -- Create new pairing with second last window
+        local orderedWindows = hs.window.orderedWindows()
+        if #orderedWindows < 2 then
+            return
+        end
+
+        -- Find the second window that isn't already paired
+        local secondWindow = nil
+        for i = 1, #orderedWindows do
+            local candidateId = orderedWindows[i]:id()
+            if candidateId ~= currentId and not gWindowsPaired[candidateId] then
+                secondWindow = orderedWindows[i]
+                break
+            end
+        end
+
+        if not secondWindow then
+            hs.alert.show("No unpaired windows available")
+            return
+        end
+
+        local secondId = secondWindow:id()
+
+        -- Store original frames before arranging
+        gOriginalFrames[currentId] = w:frame():copy()
+        gOriginalFrames[secondId] = secondWindow:frame():copy()
+
+        -- Create bidirectional pairing
+        gWindowsPaired[currentId] = secondId
+        gWindowsPaired[secondId] = currentId
+
+        -- Arrange side by side on the current window's screen
+        local screen = w:screen()
+        local frame = screen:frame()
+
+        w:setFrame({
+            x = frame.x,
+            y = frame.y,
+            w = frame.w / 2,
+            h = frame.h * 0.7
+        })
+
+        secondWindow:setFrame({
+            x = frame.x + frame.w / 2,
+            y = frame.y,
+            w = frame.w / 2,
+            h = frame.h * 0.7
+        })
+
+        gWindowsArranged[currentId] = true
+        gWindowsArranged[secondId] = true
     end
-
-    -- Handle arrange case
-    local w = hs.window.orderedWindows()
-    if #w < 2 then
-        return
-    end
-
-    -- Store the window references and their original frames
-    gLastWindow1 = w[1]
-    gLastWindow2 = w[2]
-    gLastWindowFrame1 = w[1]:frame()
-    gLastWindowFrame2 = w[2]:frame()
-
-    -- Get the screen of the first window
-    local screen = w[1]:screen()
-    local frame = screen:frame()
-
-    -- Set exact frame dimensions for each window
-    w[1]:setFrame({
-        x = frame.x,
-        y = frame.y,
-        w = frame.w / 2,
-        h = frame.h * 0.7
-    })
-
-    w[2]:setFrame({
-        x = frame.x + frame.w / 2,
-        y = frame.y,
-        w = frame.w / 2,
-        h = frame.h * 0.7
-    })
-
-    gWindowsArranged = true
 end
+
+-- Add function to clean up when a window is closed
+local windowFilter = hs.window.filter.new()
+windowFilter:subscribe(hs.window.filter.windowDestroyed, function(window)
+    local windowId = window:id()
+    if gWindowsPaired[windowId] then
+        local pairedId = gWindowsPaired[windowId]
+        -- Clean up both windows' data
+        gWindowsPaired[windowId] = nil
+        gWindowsPaired[pairedId] = nil
+        gWindowsArranged[windowId] = nil
+        gWindowsArranged[pairedId] = nil
+        gOriginalFrames[windowId] = nil
+        gOriginalFrames[pairedId] = nil
+    end
+end)
 
 -- Single hotkey for toggling
 hs.hotkey.bind({"alt"}, "2", toggleLastTwoWindows)
