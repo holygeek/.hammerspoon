@@ -547,11 +547,18 @@ function toggleSideBySideLastTwoWindows()
     end
 end
 
--- Modify window filter to maintain gWindowPairs
+-- Modify window filter to maintain gWindowPairs and restore remaining window
 windowFilter:subscribe(hs.window.filter.windowDestroyed, function(window)
     local windowId = window:id()
     if gWindowsPaired[windowId] then
         local pairedId = gWindowsPaired[windowId]
+        local remainingWindow = hs.window.get(pairedId)
+
+        -- Restore the remaining window if it exists
+        if remainingWindow and gSideBySideOriginalFrames[pairedId] then
+            remainingWindow:setFrame(gSideBySideOriginalFrames[pairedId])
+        end
+
         -- Clean up both windows' data
         gWindowsPaired[windowId] = nil
         gWindowsPaired[pairedId] = nil
