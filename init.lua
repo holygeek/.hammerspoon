@@ -66,14 +66,6 @@ hs.hotkey.bind({"alt", "shift"}, "x", function() hs.execute("sh -c '$HOME/dev/bi
 hs.hotkey.bind({"alt", "shift"}, "z", openswitch("zoom.us"))
 hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
 hs.hotkey.bind({"alt", "shift"}, "h", function() hs.application.get("Hammerspoon"):activate(true) end)
-function twoWindow()
-	local ws = hs.window.orderedWindows()
-	print('1', ws[2]:title(), ws[1]:role())
-	print('2', ws[3]:title(), ws[2]:role())
-	hs.grid.set(ws[2], hs.geometry(0, 0, 0.5, 0))
-	hs.grid.set(ws[3], hs.geometry(0.5, 0, 0.5, 0))
-end
-hs.hotkey.bind({"ctrl", "alt"}, "2", twoWindow)
 
 -- screencapture to ram
 function captureToRam()
@@ -380,9 +372,8 @@ hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
 -- Add global maps for window pairing and state
 local gWindowsPaired = {}      -- Maps window ID to its paired window ID
 local gWindowsArranged = {}    -- Maps window ID to arranged state (true/false)
-local gOriginalFrames = {}     -- Maps window ID to original frame
-
-function toggleLastTwoWindows()
+local gSideBySideOriginalFrames = {}     -- Maps window ID to original frame
+function toggleSideBySideLastTwoWindows()
     local w = hs.window.frontmostWindow()
     if not w then
         return
@@ -400,15 +391,15 @@ function toggleLastTwoWindows()
             -- Clean up orphaned pairing
             gWindowsPaired[currentId] = nil
             gWindowsArranged[currentId] = nil
-            gOriginalFrames[currentId] = nil
+            gSideBySideOriginalFrames[currentId] = nil
             return
         end
 
         -- Toggle arrangement state
         if gWindowsArranged[currentId] then
             -- Restore original positions
-            w:setFrame(gOriginalFrames[currentId])
-            pairedWindow:setFrame(gOriginalFrames[pairedId])
+            w:setFrame(gSideBySideOriginalFrames[currentId])
+            pairedWindow:setFrame(gSideBySideOriginalFrames[pairedId])
             gWindowsArranged[currentId] = false
             gWindowsArranged[pairedId] = false
         else
@@ -458,8 +449,8 @@ function toggleLastTwoWindows()
         local secondId = secondWindow:id()
 
         -- Store original frames before arranging
-        gOriginalFrames[currentId] = w:frame():copy()
-        gOriginalFrames[secondId] = secondWindow:frame():copy()
+        gSideBySideOriginalFrames[currentId] = w:frame():copy()
+        gSideBySideOriginalFrames[secondId] = secondWindow:frame():copy()
 
         -- Create bidirectional pairing
         gWindowsPaired[currentId] = secondId
@@ -487,7 +478,6 @@ function toggleLastTwoWindows()
         gWindowsArranged[secondId] = true
     end
 end
-
 -- Add function to clean up when a window is closed
 local windowFilter = hs.window.filter.new()
 windowFilter:subscribe(hs.window.filter.windowDestroyed, function(window)
@@ -499,19 +489,17 @@ windowFilter:subscribe(hs.window.filter.windowDestroyed, function(window)
         gWindowsPaired[pairedId] = nil
         gWindowsArranged[windowId] = nil
         gWindowsArranged[pairedId] = nil
-        gOriginalFrames[windowId] = nil
-        gOriginalFrames[pairedId] = nil
+        gSideBySideOriginalFrames[windowId] = nil
+        gSideBySideOriginalFrames[pairedId] = nil
     end
 end)
-
 -- Single hotkey for toggling
-hs.hotkey.bind({"alt"}, "2", toggleLastTwoWindows)
-
+hs.hotkey.bind({"alt"}, "2", toggleSideBySideLastTwoWindows)
 
 -- Add global map to store original window frames
-local gOriginalFrames = {}
+local gOriginalWidths = {}
 -- Resize current window to full width of screen
-hs.hotkey.bind({"alt","shift"}, "w", function()
+function toggleFullWidth()
     local w = hs.window.frontmostWindow()
     if not w then
         return
@@ -526,7 +514,7 @@ hs.hotkey.bind({"alt","shift"}, "w", function()
     -- If window is not full width
     if wFrame.w ~= frame.w then
         -- Store original frame in map
-        gOriginalFrames[windowId] = wFrame:copy()
+        gOriginalWidths[windowId] = wFrame:copy()
 
         -- Resize to full width
         w:setFrame({
@@ -537,9 +525,9 @@ hs.hotkey.bind({"alt","shift"}, "w", function()
         })
     else
         -- Restore to original width if we have stored state
-        if gOriginalFrames[windowId] then
-            w:setFrame(gOriginalFrames[windowId])
-            gOriginalFrames[windowId] = nil  -- Clear stored state
+        if gOriginalWidths[windowId] then
+            w:setFrame(gOriginalWidths[windowId])
+            gOriginalWidths[windowId] = nil  -- Clear stored state
         else
             -- Default to half width if no stored state
             w:setFrame({
@@ -550,4 +538,5 @@ hs.hotkey.bind({"alt","shift"}, "w", function()
             })
         end
     end
-end)
+end
+hs.hotkey.bind({"alt","shift"}, "w", toggleFullWidth)
