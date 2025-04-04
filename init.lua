@@ -117,19 +117,32 @@ local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
 	-- if #hs.screen.allScreens() == 3 then
 	local nScreen = #hs.screen.allScreens()
+	local config = "solo"
 	if nScreen >= 2 then
-		if nScreen == 3 then
-			rw:run('iTerm', '^(%a)$', 'iTerm.3.monitors.home')
-			rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.3.monitors.home')
-		else
-			rw:run('iTerm', '^(%a)$', 'iTerm.2.monitors.office')
-			rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.2.monitors.office')
+		for i, screen in ipairs(hs.screen.allScreens()) do
+			-- print(i, screen:name(), screen:id())
+			if screen:name() == 'Dell AW3821DW' then
+				config = "home"
+				break
+			elseif screen:name() == 'DELL U2723QE' then
+				config = "office"
+				break
+			end
 		end
-		rw:run('zoom', '(.+)')
-		rw:run('Slack', '.+(Slack)$')
-	else
-		rw:run('iTerm', '^(%a)$', 'iTerm.laptop')
 	end
+
+	if config == "solo" then
+		rw:run('iTerm', '^(%a)$', 'iTerm.laptop')
+	elseif config == "home" then
+		rw:run('iTerm', '^(%a)$', 'iTerm.3.monitors.home')
+		rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.3.monitors.home')
+	elseif config == "office" then
+		rw:run('iTerm', '^(%a)$', 'iTerm.2.monitors.office')
+		rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.2.monitors.office')
+	end
+
+	rw:run('zoom', '(.+)')
+	rw:run('Slack', '.+(Slack)$')
 	hs.alert.show("Done")
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
 end)
