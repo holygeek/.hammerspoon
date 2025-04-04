@@ -373,6 +373,68 @@ hs.hotkey.bind({"alt", "shift"}, "c", centerFrontmostWindow)
 local gWindowsPaired = {}      -- Maps window ID to its paired window ID
 local gWindowsArranged = {}    -- Maps window ID to arranged state (true/false)
 local gSideBySideOriginalFrames = {}     -- Maps window ID to original frame
+
+-- Add global table to store all window pairs
+local gWindowPairs = {}  -- Array of pairs, each pair is {id1, id2}
+local gCurrentPairIndex = 1
+
+-- Initialize window filter
+local windowFilter = hs.window.filter.new()
+
+function addWindowPair(id1, id2)
+    -- Add to gWindowPairs if not already present
+    for _, pair in ipairs(gWindowPairs) do
+        if (pair[1] == id1 and pair[2] == id2) or (pair[1] == id2 and pair[2] == id1) then
+            return
+        end
+    end
+    table.insert(gWindowPairs, {id1, id2})
+end
+
+function removeWindowPair(id1, id2)
+    for i, pair in ipairs(gWindowPairs) do
+        if (pair[1] == id1 and pair[2] == id2) or (pair[1] == id2 and pair[2] == id1) then
+            table.remove(gWindowPairs, i)
+            if gCurrentPairIndex > #gWindowPairs then
+                gCurrentPairIndex = 1
+            end
+            return
+        end
+    end
+end
+
+function cyclePairedWindows()
+    if #gWindowPairs == 0 then
+        hs.alert.show("No paired windows")
+        return
+    end
+
+    -- Get the current pair
+    local pair = gWindowPairs[gCurrentPairIndex]
+    local win1 = hs.window.get(pair[1])
+    local win2 = hs.window.get(pair[2])
+
+    -- Check if windows still exist
+    if not win1 or not win2 then
+        -- Remove invalid pair
+        removeWindowPair(pair[1], pair[2])
+        return
+    end
+
+    -- Bring both windows to front
+    win1:focus()
+    win2:focus()
+
+    -- Move to next pair
+    gCurrentPairIndex = gCurrentPairIndex + 1
+    if gCurrentPairIndex > #gWindowPairs then
+        gCurrentPairIndex = 1
+    end
+
+    -- Show which pair we're on
+    hs.alert.show("Pair " .. gCurrentPairIndex .. " of " .. #gWindowPairs)
+end
+
 function toggleSideBySideLastTwoWindows()
     local w = hs.window.frontmostWindow()
     if not w then
@@ -392,6 +454,7 @@ function toggleSideBySideLastTwoWindows()
             gWindowsPaired[currentId] = nil
             gWindowsArranged[currentId] = nil
             gSideBySideOriginalFrames[currentId] = nil
+            removeWindowPair(currentId, pairedId)
             return
         end
 
@@ -402,6 +465,8 @@ function toggleSideBySideLastTwoWindows()
             pairedWindow:setFrame(gSideBySideOriginalFrames[pairedId])
             gWindowsArranged[currentId] = false
             gWindowsArranged[pairedId] = false
+            -- Remove from pairs when restoring
+            removeWindowPair(currentId, pairedId)
         else
             -- Arrange side by side on the current window's screen
             local screen = w:screen()
@@ -423,6 +488,8 @@ function toggleSideBySideLastTwoWindows()
 
             gWindowsArranged[currentId] = true
             gWindowsArranged[pairedId] = true
+            -- Add to pairs when arranging
+            addWindowPair(currentId, pairedId)
         end
     else
         -- Create new pairing with second last window
@@ -476,10 +543,12 @@ function toggleSideBySideLastTwoWindows()
 
         gWindowsArranged[currentId] = true
         gWindowsArranged[secondId] = true
+        -- Add new pair when arranging
+        addWindowPair(currentId, secondId)
     end
 end
--- Add function to clean up when a window is closed
-local windowFilter = hs.window.filter.new()
+
+-- Modify window filter to maintain gWindowPairs
 windowFilter:subscribe(hs.window.filter.windowDestroyed, function(window)
     local windowId = window:id()
     if gWindowsPaired[windowId] then
@@ -491,8 +560,11 @@ windowFilter:subscribe(hs.window.filter.windowDestroyed, function(window)
         gWindowsArranged[pairedId] = nil
         gSideBySideOriginalFrames[windowId] = nil
         gSideBySideOriginalFrames[pairedId] = nil
+        -- Remove from pairs
+        removeWindowPair(windowId, pairedId)
     end
 end)
+
 -- Single hotkey for toggling
 hs.hotkey.bind({"alt"}, "2", toggleSideBySideLastTwoWindows)
 
@@ -540,3 +612,6 @@ function toggleFullWidth()
     end
 end
 hs.hotkey.bind({"alt","shift"}, "w", toggleFullWidth)
+
+-- Add new hotkey for cycling through pairs
+hs.hotkey.bind({"alt", "shift"}, "2", cyclePairedWindows)
