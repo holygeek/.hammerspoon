@@ -283,7 +283,6 @@ function raiseOther()
 		::continue::
 	end
 
-
 	-- sort others table alphabetically by the title
 	local toselect = {}
 	local j = 1
