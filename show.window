@@ -1,4 +1,4 @@
-#! /opt/local/bin/hs
+#!/usr/bin/env hs
 local app, windows;
 
 local name = _cli.args[2]
