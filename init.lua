@@ -153,13 +153,13 @@ hs.hotkey.bind({"alt"}, "x", function()
 		end
 	end
 
-	if config == "solo" then
-		rw:run('iTerm', '^(%a)$', 'iTerm.laptop')
-	elseif config == "home" then
-		rw:run('iTerm', '^(%a)$', 'iTerm.3.monitors.home')
+	-- Use new percentage-based positioning for iTerm
+	rw:positionItermWindows()
+
+	-- Continue with file-based positioning for other apps
+	if config == "home" then
 		rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.3.monitors.home')
 	elseif config == "office" then
-		rw:run('iTerm', '^(%a)$', 'iTerm.2.monitors.office')
 		rw:run('Chrome', '%[([^%]]+)%]', 'Chrome.2.monitors.office')
 	end
 

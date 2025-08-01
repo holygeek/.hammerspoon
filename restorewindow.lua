@@ -1,8 +1,108 @@
 local obj = {}
 -- obj.__index = obj
 
+-- Hardcoded iTerm window positions as percentages of screen dimensions
+-- Format: {x%, y%, width%, height%}
+local itermPositions = {
+    -- When on laptop only (all windows on single screen)
+    laptop = {
+        a = {16.4, 9.1, 71.0, 72.4},   -- centered main window
+        s = {0, 0, 50, 100},           -- left half
+        v = {50, 0, 50, 100},          -- right half
+        r = {50, 0, 50, 100},   -- right half variant
+        f = {0, 0, 100, 100},       -- full width
+        g = {0, 0, 50, 50},    -- left upper
+        i = {50, 0, 50, 50},   -- right upper
+        h = {0, 0, 100, 50},       -- full width top half
+        l = {0, 50, 100, 50},     -- full width bottom half
+        k = {15, 0, 70, 100}    -- center large
+    },
+    -- When external monitors available
+    external = {
+        -- Positions on external monitor (as % of external monitor size)
+        s = { 0 , 0, 34, 100},           -- left half
+        v = {34,  0, 34, 100},          -- right half
+        r = {68,  0, 32, 100},          -- right half (same as v)
+        f = {34,  0, 66, 100},          -- full screen
+        k = {30,  0, 55, 100},           -- left 55%
+        g = { 0,  0, 50, 54},            -- left upper
+        i = {50,  0, 50, 54},           -- right upper
+        h = {34,  0, 66, 50},         -- full width top half
+        l = {34, 50, 66, 50},          -- full width bottom half
+        -- Position on laptop screen (as % of laptop screen size)
+        a = {16.4, 14.5, 71.0, 72.4}  -- centered on laptop
+    }
+}
+
 function wait (s)
     io.popen("gsleep " .. s):close()
+end
+
+-- Function to find the biggest external monitor by resolution
+function findBiggestExternalMonitor()
+    local screens = hs.screen.allScreens()
+    local internalScreen = hs.screen.primaryScreen()
+    local biggestExternal = nil
+    local maxArea = 0
+
+    for _, screen in ipairs(screens) do
+        if screen ~= internalScreen then
+            local size = screen:frame()
+            local area = size.w * size.h
+            if area > maxArea then
+                maxArea = area
+                biggestExternal = screen
+            end
+        end
+    end
+
+    return biggestExternal
+end
+
+-- Function to position iTerm windows using percentage-based positions
+function obj:positionItermWindows()
+    local itermApp = hs.application.find("iTerm2") or hs.application.find("iTerm")
+    if not itermApp then
+        print("iTerm not found")
+        return
+    end
+
+    local screens = hs.screen.allScreens()
+    local laptopScreen = hs.screen.primaryScreen()
+    local externalScreen = findBiggestExternalMonitor()
+
+    -- Determine which position set to use
+    local positions = externalScreen and itermPositions.external or itermPositions.laptop
+
+    -- Position each iTerm window
+    for _, window in ipairs(itermApp:allWindows()) do
+        local title = window:title()
+        -- Extract single letter from title (match pattern ^[a-z]$)
+        local letter = title:match("^([a-z])$")
+
+        if letter and positions[letter] then
+            local pos = positions[letter]
+            local targetScreen = laptopScreen
+
+            -- If external monitor exists and this isn't window 'a', use external monitor
+            if externalScreen and letter ~= 'a' then
+                targetScreen = externalScreen
+            end
+
+            local frame = targetScreen:frame()
+            local newFrame = {
+                x = frame.x + (frame.w * pos[1] / 100),
+                y = frame.y + (frame.h * pos[2] / 100),
+                w = frame.w * pos[3] / 100,
+                h = frame.h * pos[4] / 100
+            }
+
+            print(string.format("Positioning iTerm '%s' to {x=%.0f, y=%.0f, w=%.0f, h=%.0f}",
+                letter, newFrame.x, newFrame.y, newFrame.w, newFrame.h))
+
+            window:setFrame(newFrame)
+        end
+    end
 end
 
 function atRightLocation(window, geom)
