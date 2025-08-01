@@ -97,14 +97,6 @@ function focusLastFocused()
 end
 hs.hotkey.bind({"alt"}, "tab", focusLastFocused)
 
-
-hs.hotkey.bind({"alt"}, "z", function()
-	local zooms = {hs.application.find("zoom.us")}
-	for i=1,#zooms do
-		zooms[i]:activate(true)
-	end
-end)
-
 local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
 	-- TODO use screenPositions() to determine position x left to right, y top to bottom
