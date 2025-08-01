@@ -25,10 +25,10 @@ local WH3defaultHotkeys = {
 	right_half   = { {"alt", "shift"    }, "Right" },
 	top_half     = { {"alt", "shift"    }, "Up" },
 	bottom_half  = { {"alt", "shift"    }, "Down" },
-	third_left   = { {"alt",            }, "Left" },
-	third_right  = { {"alt",            }, "Right" },
-	third_up     = { {"alt",            }, "Up" },
-	third_down   = { {"alt",            }, "Down" },
+	-- third_left   = { {"alt",            }, "Left" },
+	-- third_right  = { {"alt",            }, "Right" },
+	-- third_up     = { {"alt",            }, "Up" },
+	-- third_down   = { {"alt",            }, "Down" },
 	--    top_left     = { {"ctrl",        "cmd"}, "1" },
 	--    top_right    = { {"ctrl",        "cmd"}, "2" },
 	--    bottom_left  = { {"ctrl",        "cmd"}, "3" },
@@ -107,7 +107,37 @@ end)
 
 local rw = require("restorewindow")
 hs.hotkey.bind({"alt"}, "x", function()
-	-- if #hs.screen.allScreens() == 3 then
+	-- TODO use screenPositions() to determine position x left to right, y top to bottom
+	-- > hs.inspect(hs.screen.screenPositions())
+	-- {
+	--   [<userdata 1> -- hs.screen: Built-in Retina Display (0x600001fde9f8)] = {
+	--     x = 0,
+	--     y = 0
+	--   },
+	--   [<userdata 2> -- hs.screen: DELL U2723QE (0x600001fde938)] = {
+	--     x = 0,
+	--     y = -1
+	--   }
+	-- }
+	--
+	--
+	--> hs.inspect(hs.screen.screenPositions())
+	-- Loading extension: inspect
+	-- {
+	--   [<userdata 1> -- hs.screen: Dell AW3821DW (0x600003475838)] = {
+	--     x = 1,
+	--     y = 0
+	--   },
+	--   [<userdata 2> -- hs.screen: Built-in Retina Display (0x600003475338)] = {
+	--     x = 0,
+	--     y = 0
+	--   },
+	--   [<userdata 3> -- hs.screen: DELL U2719D (0x6000034774f8)] = {
+	--     x = 2,
+	--     y = 0
+	--   }
+	-- }
+
 	local nScreen = #hs.screen.allScreens()
 	local config = "solo"
 	if nScreen >= 2 then
@@ -135,6 +165,7 @@ hs.hotkey.bind({"alt"}, "x", function()
 
 	rw:run('zoom', '(.+)')
 	rw:run('Slack', '.+(Slack)$')
+	rw:run('Cursor', '(.+)')
 	hs.alert.show("Done")
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
 end)
@@ -201,6 +232,15 @@ function raiseAllWindow(appname)
 		local apps = {hs.application.find(appname)}
 		for i=1,#apps do
 			apps[i]:activate(true)
+			if appname == "Slack" then
+				local slackApp = apps[i]
+				hs.timer.doAfter(0.1, function() -- Add a small delay
+					local slackWindow = slackApp:mainWindow() or slackApp:frontmostWindow()
+					if slackWindow then
+						slackWindow:focus() -- Then try to focus the window
+					end
+				end)
+			end
 		end
 	end
 end
