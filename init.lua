@@ -661,3 +661,57 @@ hs.hotkey.bind({"alt","shift"}, "w", toggleFullWidth)
 
 -- Add new hotkey for cycling through pairs
 hs.hotkey.bind({"alt", "shift"}, "2", cyclePairedWindows)
+
+-- Window chooser
+local windowChooser = hs.chooser.new(function(choice)
+    if not choice then return end
+    local win = choice["win"]
+    if win then
+        win:focus()
+    end
+end)
+
+windowChooser:searchSubText(true)
+windowChooser:bgDark(true)
+windowChooser:rows(10)
+
+function showChromeBracketWindows()
+    local choices = {}
+
+    -- Chrome windows
+    local chromeApp = hs.application.find("Google Chrome")
+    if chromeApp then
+        for _, win in ipairs(chromeApp:allWindows()) do
+            local title = win:title()
+            -- Check if title starts with [something]
+            local bracketContent = title:match("^%[([^%]]+)%]")
+            if bracketContent then
+                table.insert(choices, {
+                    text = title,
+                    subText = bracketContent,
+                    win = win,
+                    app = "Chrome"
+                })
+            end
+        end
+    end
+
+    -- Future: Add other applications here
+    -- local otherApp = hs.application.find("AppName")
+    -- if otherApp then
+    --     -- Add windows from otherApp
+    -- end
+
+    if #choices == 0 then
+        return
+    end
+
+    -- Sort choices alphabetically by bracket content
+    table.sort(choices, function(a, b) return a.subText < b.subText end)
+
+    windowChooser:choices(choices)
+    windowChooser:query(nil)
+    windowChooser:show()
+end
+
+hs.hotkey.bind({"alt"}, "j", showChromeBracketWindows)
