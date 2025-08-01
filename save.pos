@@ -62,7 +62,7 @@ end
 
 print("=== windows ===")
 print(hs.inspect.inspect(windows))
--- do return end
+do return end
 
 local fileSuffix = appName
 -- print('a', appName, hs.inspect.inspect(settings[cliName]))
