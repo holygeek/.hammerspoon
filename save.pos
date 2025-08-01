@@ -1,4 +1,4 @@
-#!/opt/local/bin/hs
+#!/usr/bin/env hs
 -- vim:ft=lua
 
 local settings = {
@@ -27,6 +27,7 @@ local appName = cliName
 if appName == 'chrome' then appName = 'Chrome' end
 if appName == 'iterm' then appName = 'iTerm' end
 if appName == 'slack' then appName = 'Slack' end
+if appName == 'cursor' then appName = 'Cursor' end
 
 local titlePattern = '(.+)'
 if settings[appName] then
