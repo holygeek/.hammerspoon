@@ -1,39 +1,6 @@
 local obj = {}
 -- obj.__index = obj
 
--- Hardcoded iTerm window positions as percentages of screen dimensions
--- Format: {x%, y%, width%, height%}
-local itermPositions = {
-    -- When on laptop only (all windows on single screen)
-    laptop = {
-        a = {16.4, 9.1, 71.0, 72.4},   -- centered main window
-        s = {0, 0, 50, 100},           -- left half
-        v = {50, 0, 50, 100},          -- right half
-        r = {50, 0, 50, 100},   -- right half variant
-        f = {0, 0, 100, 100},       -- full width
-        g = {0, 0, 50, 50},    -- left upper
-        i = {50, 0, 50, 50},   -- right upper
-        h = {0, 0, 100, 50},       -- full width top half
-        l = {0, 50, 100, 50},     -- full width bottom half
-        k = {15, 0, 70, 100}    -- center large
-    },
-    -- When external monitors available
-    external = {
-        -- Positions on external monitor (as % of external monitor size)
-        s = { 0 , 0, 34, 100},           -- left half
-        v = {34,  0, 34, 100},          -- right half
-        r = {68,  0, 32, 100},          -- right half (same as v)
-        f = {34,  0, 66, 100},          -- full screen
-        k = {30,  0, 55, 100},           -- left 55%
-        g = { 0,  0, 50, 54},            -- left upper
-        i = {50,  0, 50, 54},           -- right upper
-        h = {34,  0, 66, 50},         -- full width top half
-        l = {34, 50, 66, 50},          -- full width bottom half
-        -- Position on laptop screen (as % of laptop screen size)
-        a = {16.4, 14.5, 71.0, 72.4}  -- centered on laptop
-    }
-}
-
 function wait (s)
     io.popen("gsleep " .. s):close()
 end
@@ -60,7 +27,7 @@ function findBiggestExternalMonitor()
 end
 
 -- Function to position iTerm windows using percentage-based positions
-function obj:positionItermWindows()
+function obj:positionItermWindows(itermPositions)
     local itermApp = hs.application.find("iTerm2") or hs.application.find("iTerm")
     if not itermApp then
         print("iTerm not found")
