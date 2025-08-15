@@ -6,7 +6,8 @@ hs.window.animationDuration = 0
 -- Format: {x%, y%, width%, height%}
 local itermPositions = {
     -- When on laptop only (all windows on single screen)
-    laptop = {
+    solo = {
+        name = "solo",
         a = {16.4, 9.1, 71.0, 72.4},   -- centered main window
         s = {0, 0, 50, 100},           -- left half
         v = {50, 0, 50, 100},          -- right half
@@ -20,18 +21,36 @@ local itermPositions = {
     },
     -- When external monitors available
     external = {
-        -- Positions on external monitor (as % of external monitor size)
-        s = { 0 , 0, 36, 100},           -- left half
-        v = {36,  0, 36, 100},          -- right half
-        r = {70,  0, 30, 100},          -- right half (same as v)
-        f = {36,  0, 64, 100},          -- full screen
-        k = {30,  0, 55, 100},           -- left 55%
-        g = { 0,  0, 50, 54},            -- left upper
-        i = {50,  0, 50, 54},           -- right upper
-        h = {36,  0, 64, 50},         -- full width top half
-        l = {36, 50, 64, 50},          -- full width bottom half
-        -- Position on laptop screen (as % of laptop screen size)
-        a = {16.4, 14.5, 71.0, 72.4}  -- centered on laptop
+        home = {
+            name = "home",
+            -- Positions on external monitor (as % of external monitor size)
+            s = { 0 , 0, 36, 100},           -- left half
+            v = {36,  0, 36, 100},          -- right half
+            r = {70,  0, 30, 100},          -- right half (same as v)
+            f = {36,  0, 64, 100},          -- full screen
+            k = {30,  0, 55, 100},           -- left 55%
+            g = { 0,  0, 50, 54},            -- left upper
+            i = {50,  0, 50, 54},           -- right upper
+            h = {36,  0, 64, 50},         -- full width top half
+            l = {36, 50, 64, 50},          -- full width bottom half
+            -- Position on laptop screen (as % of laptop screen size)
+            a = {16.4, 14.5, 71.0, 72.4}  -- centered on laptop
+        },
+        office = {
+            name = "office",
+            -- Positions on external monitor (as % of external monitor size)
+            s = { 0 , 0, 50, 100},           -- left half
+            v = {50,  0, 50, 100},          -- right half
+            r = {70,  0, 30, 100},          -- right half (same as v)
+            f = {36,  0, 64, 100},          -- full screen
+            k = {30,  0, 55, 100},           -- left 55%
+            g = { 0,  0, 50, 54},            -- left upper
+            i = {50,  0, 50, 54},           -- right upper
+            h = {36,  0, 64, 50},         -- full width top half
+            l = {36, 50, 64, 50},          -- full width bottom half
+            -- Position on laptop screen (as % of laptop screen size)
+            a = {16.4, 14.5, 71.0, 72.4}  -- centered on laptop
+        }
     }
 }
 
@@ -167,7 +186,7 @@ hs.hotkey.bind({"alt"}, "x", function()
 	local config = "solo"
 	if nScreen >= 2 then
 		for i, screen in ipairs(hs.screen.allScreens()) do
-			-- print(i, screen:name(), screen:id())
+			print(i, '"' .. screen:name() .. '"', screen:id())
 			if screen:name() == 'Dell AW3821DW' then
 				config = "home"
 				break
@@ -179,7 +198,7 @@ hs.hotkey.bind({"alt"}, "x", function()
 	end
 
 	-- Use new percentage-based positioning for iTerm
-	rw:positionItermWindows(itermPositions)
+	rw:positionItermWindows(itermPositions, config)
 
 	-- Continue with file-based positioning for other apps
 	if config == "home" then

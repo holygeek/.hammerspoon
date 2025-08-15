@@ -27,19 +27,24 @@ function findBiggestExternalMonitor()
 end
 
 -- Function to position iTerm windows using percentage-based positions
-function obj:positionItermWindows(itermPositions)
+function obj:positionItermWindows(itermPositions, config)
     local itermApp = hs.application.find("iTerm2") or hs.application.find("iTerm")
     if not itermApp then
         print("iTerm not found")
         return
     end
+    print("screenConfig " .. config)
 
     local screens = hs.screen.allScreens()
     local laptopScreen = hs.screen.primaryScreen()
     local externalScreen = findBiggestExternalMonitor()
 
     -- Determine which position set to use
-    local positions = externalScreen and itermPositions.external or itermPositions.laptop
+    local positions = itermPositions.solo
+    if externalScreen then
+	positions = itermPositions.external[config]
+    end
+    print("positions name: " .. positions.name)
 
     -- Position each iTerm window
     for _, window in ipairs(itermApp:allWindows()) do
