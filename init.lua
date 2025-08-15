@@ -24,12 +24,12 @@ local itermPositions = {
         s = { 0 , 0, 36, 100},           -- left half
         v = {36,  0, 36, 100},          -- right half
         r = {70,  0, 30, 100},          -- right half (same as v)
-        f = {34,  0, 66, 100},          -- full screen
+        f = {36,  0, 64, 100},          -- full screen
         k = {30,  0, 55, 100},           -- left 55%
         g = { 0,  0, 50, 54},            -- left upper
         i = {50,  0, 50, 54},           -- right upper
-        h = {34,  0, 66, 50},         -- full width top half
-        l = {34, 50, 66, 50},          -- full width bottom half
+        h = {36,  0, 64, 50},         -- full width top half
+        l = {36, 50, 64, 50},          -- full width bottom half
         -- Position on laptop screen (as % of laptop screen size)
         a = {16.4, 14.5, 71.0, 72.4}  -- centered on laptop
     }
