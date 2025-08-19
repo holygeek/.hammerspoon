@@ -731,7 +731,7 @@ function showChromeBracketWindows()
             local bracketContent = title:match("^%[([^%]]+)%]")
             if bracketContent then
                 table.insert(choices, {
-                    text = title,
+                    text = string.gsub(title, ' . Google Chrome', ''),
                     subText = bracketContent,
                     win = win,
                     app = "Chrome"
