@@ -1,9 +1,17 @@
+-- Start timing the config load
+local startTime = os.clock()
+local function logTime(operation)
+    print(string.format("[TIMING] %s: %.3fs", operation, os.clock() - startTime))
+end
+
 hs.ipc.cliInstall("/opt/local", true)
+logTime("hs.ipc.cliInstall")
 
 hs.window.animationDuration = 0
 
 -- Hardcoded iTerm window positions as percentages of screen dimensions
 -- Format: {x%, y%, width%, height%}
+logTime("Initial setup")
 local itermPositions = {
     -- When on laptop only (all windows on single screen)
     solo = {
@@ -53,6 +61,7 @@ local itermPositions = {
         }
     }
 }
+logTime("iTerm positions defined")
 
 -- Reload config automatically
 function reloadConfig(files)
@@ -68,10 +77,12 @@ function reloadConfig(files)
 	end
 end
 myWatcher = hs.pathwatcher.new(os.getenv("HOME") .. "/dev/.hammerspoon/", reloadConfig):start()
-hs.alert.show("Config loaded")
+logTime("Path watcher initialized")
+hs.alert.show(string.format("Config loaded in %.3fs", os.clock() - startTime))
 
 -- WindowHalfsAndThirds.Spooon
 hs.loadSpoon("WindowHalfsAndThirds")
+logTime("WindowHalfsAndThirds loaded")
 local WH3defaultHotkeys = {
 	left_half    = { {"alt", "shift"    }, "Left" },
 	right_half   = { {"alt", "shift"    }, "Right" },
@@ -93,9 +104,11 @@ local WH3defaultHotkeys = {
 	--    smaller      = { {        "alt", "cmd", "shift"}, "Left" },
 }
 spoon.WindowHalfsAndThirds:bindHotkeys(WH3defaultHotkeys)
+logTime("WindowHalfsAndThirds hotkeys bound")
 
 --  // Window switcher
 local switcher  = require('switcher')
+logTime("Switcher module loaded")
 -- Alt-B is bound to the switcher dialog for all apps.
 -- Alt-shift-B is bound to the switcher dialog for the current app.
 function openswitch(name)
@@ -111,6 +124,7 @@ function openswitch(name)
 	end
 end
 -- hs.hotkey.bind({"alt", "shift"}, "b", openswitch("Google Chrome"))
+logTime("Starting initial hotkey bindings")
 hs.hotkey.bind({"alt", "shift"}, "j", function() hs.execute("sh -c '$HOME/dev/bin/jira $(pbpaste)'", true) end)
 hs.hotkey.bind({"alt", "shift"}, "q", openswitch("Preview"))
 hs.hotkey.bind({"alt", "shift"}, "s", openswitch("Slack"))
@@ -118,6 +132,7 @@ hs.hotkey.bind({"alt", "shift"}, "x", function() hs.execute("sh -c '$HOME/dev/bi
 hs.hotkey.bind({"alt", "shift"}, "z", openswitch("zoom.us"))
 hs.hotkey.bind({"alt"}, "space", function() switcher:selectWindow(false) end)
 hs.hotkey.bind({"alt", "shift"}, "h", function() hs.application.get("Hammerspoon"):activate(true) end)
+logTime("Initial hotkey bindings complete")
 
 -- screencapture to ram
 function captureToRam()
@@ -127,6 +142,7 @@ hs.hotkey.bind({"alt", "shift"}, "4", captureToRam)
 
 -- SkyRocket.spoon moves window with alt+click
 local SkyRocket = hs.loadSpoon("SkyRocket")
+logTime("SkyRocket loaded")
 sky = SkyRocket:new({
 	-- Opacity of resize canvas
 	opacity = 0.6,
@@ -140,6 +156,7 @@ sky = SkyRocket:new({
 	-- Which mouse button to hold to resize a window?
 	resizeMouseButton = 'left',
 })
+logTime("SkyRocket configured")
 
 function focusLastFocused()
 	local wf = hs.window.filter
@@ -150,6 +167,7 @@ end
 hs.hotkey.bind({"alt"}, "tab", focusLastFocused)
 
 local rw = require("restorewindow")
+logTime("RestoreWindow module loaded")
 hs.hotkey.bind({"alt"}, "x", function()
 	-- TODO use screenPositions() to determine position x left to right, y top to bottom
 	-- > hs.inspect(hs.screen.screenPositions())
@@ -387,6 +405,8 @@ end
 -- =========
 -- chrome windows
 require("browser")
+logTime("Browser module loaded")
+logTime("Starting main app hotkey bindings")
 hs.hotkey.bind({"alt"}, "o",  raiseOther)
 -- vpn
 -- hs.hotkey.bind({"alt"}, "p", function() hs.application.find("Cisco"):activate() end)
@@ -406,6 +426,7 @@ hs.hotkey.bind({"alt"}, "z", raiseAllWindow("zoom.us"))
 
 -- Notes window
 hs.hotkey.bind({"alt"}, "n", raiseAllWindow('Notes'))
+logTime("Main app hotkey bindings complete")
 
 -- raiseWindow seems to be very slow due to hs.window.find
 function raiseAppWindow(appName, title)
@@ -427,12 +448,14 @@ function raiseAppWindow(appName, title)
 end
 -- iterm2 windows
 -- ==============
+logTime("Starting iTerm hotkey bindings")
 hs.hotkey.bind({"cmd", "alt"}, "t", startTmux)
 for i=1,#iterms do
 	local termName = iterms[i]
 	-- hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. '$'))
 	hs.hotkey.bind({"alt"}, termName, raiseAppWindow('iTerm', termName))
 end
+logTime("iTerm hotkey bindings complete")
 
 -- 2025-01-06 00:06:16: no window found matching ghostty.b
 -- ran with "~/bin/ghostty.run b"
@@ -461,6 +484,7 @@ local gCurrentPairIndex = 1
 
 -- Initialize window filter
 local windowFilter = hs.window.filter.new()
+logTime("Window filter initialized")
 
 function addWindowPair(id1, id2)
     -- Add to gWindowPairs if not already present
@@ -654,6 +678,7 @@ windowFilter:subscribe(hs.window.filter.windowDestroyed, function(window)
 end)
 
 -- Single hotkey for toggling
+logTime("Starting window pairing hotkey bindings")
 hs.hotkey.bind({"alt"}, "2", toggleSideBySideLastTwoWindows)
 
 -- Add global map to store original window frames
@@ -703,6 +728,7 @@ hs.hotkey.bind({"alt","shift"}, "w", toggleFullWidth)
 
 -- Add new hotkey for cycling through pairs
 hs.hotkey.bind({"alt", "shift"}, "2", cyclePairedWindows)
+logTime("Window pairing hotkey bindings complete")
 
 -- Window chooser
 local windowChooser = hs.chooser.new(function(choice)
@@ -759,3 +785,7 @@ function showChromeBracketWindows()
 end
 
 hs.hotkey.bind({"alt"}, "j", showChromeBracketWindows)
+
+-- Log total time at the end
+logTime("Total config load time")
+print(string.format("[TIMING] Config fully loaded in %.3fs", os.clock() - startTime))
