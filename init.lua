@@ -227,30 +227,28 @@ function centerFrontmostWindow()
 end
 function raiseWindowTitlePattern(appName, titlePattern)
 	return function()
-		-- local start = os.clock()
-		local app = hs.application.find(appName)
-		if not app then
-			print(appName, "no such app")
-			return
+		-- Use window filter to get windows from all spaces
+		local appFilter = hs.window.filter.new(false):setAppFilter(appName)
+		local windows = appFilter:getWindows()
+
+		local matchedWindow = nil
+		for _, win in ipairs(windows) do
+			local title = win:title()
+			print("title ", title)
+			if title and string.match(title, titlePattern) then
+				matchedWindow = win
+				break
+			end
 		end
-		local w = app:findWindow(titlePattern)
-		if not w then
+
+		if not matchedWindow then
 			print(appName, titlePattern, "no such window")
 			return
 		end
-		w:focus()
-		-- print(os.clock() - start)
-		--  local cmd = "cat $HOME/tmp/chrome.windows|grep '\\[" .. name .. "\\]'|grep -o '[0-9]*'"
 
-		--  local windowid, status, exitType, rc = hs.execute(cmd)
-		--  -- hs.alert.show(output)
-		--  print("windowid", windowid)
-
-		--  -- Tue 19 Nov 2024 22:25:43 +08 doesn't work. hypothesis: chrome-cli windowid  not same
-		--  local w = hs.window.get(tonumber(windowid))
-
-		-- print("output", output)
-		-- print("status", status, "exitType", exitType, "rc", rc)
+		-- Focus the window - let Hammerspoon handle space switching
+		-- This avoids the animation that occurs with explicit space switching
+		matchedWindow:focus()
 
 		-- local w = hs.window.find(titlePattern)
 		-- if w then
@@ -711,21 +709,9 @@ local windowChooser = hs.chooser.new(function(choice)
     if not choice then return end
     local win = choice["win"]
     if win then
-        -- Get the space the window is on
-        local winSpaces = hs.spaces.windowSpaces(win)
-        if winSpaces and #winSpaces > 0 then
-            local winSpace = winSpaces[1]
-            local currentSpace = hs.spaces.focusedSpace()
-
-            -- If window is on a different space, switch to that space first
-            if winSpace ~= currentSpace then
-                hs.spaces.gotoSpace(winSpace)
-            end
-        end
-
-        -- Focus and raise the window
+        -- Just focus the window - let Hammerspoon handle space switching
+        -- This avoids the animation that occurs with explicit space switching
         win:focus()
-        win:raise()
     end
 end)
 
