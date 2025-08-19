@@ -711,7 +711,21 @@ local windowChooser = hs.chooser.new(function(choice)
     if not choice then return end
     local win = choice["win"]
     if win then
+        -- Get the space the window is on
+        local winSpaces = hs.spaces.windowSpaces(win)
+        if winSpaces and #winSpaces > 0 then
+            local winSpace = winSpaces[1]
+            local currentSpace = hs.spaces.focusedSpace()
+
+            -- If window is on a different space, switch to that space first
+            if winSpace ~= currentSpace then
+                hs.spaces.gotoSpace(winSpace)
+            end
+        end
+
+        -- Focus and raise the window
         win:focus()
+        win:raise()
     end
 end)
 
@@ -722,21 +736,21 @@ windowChooser:rows(10)
 function showChromeBracketWindows()
     local choices = {}
 
-    -- Chrome windows
-    local chromeApp = hs.application.find("Google Chrome")
-    if chromeApp then
-        for _, win in ipairs(chromeApp:allWindows()) do
-            local title = win:title()
-            -- Check if title starts with [something]
-            local bracketContent = title:match("^%[([^%]]+)%]")
-            if bracketContent then
-                table.insert(choices, {
-                    text = string.gsub(title, ' . Google Chrome', ''),
-                    subText = bracketContent,
-                    win = win,
-                    app = "Chrome"
-                })
-            end
+    -- Use window filter to get Chrome windows from all spaces
+    local chromeFilter = hs.window.filter.new(false):setAppFilter('Google Chrome')
+    local chromeWindows = chromeFilter:getWindows()
+
+    for _, win in ipairs(chromeWindows) do
+        local title = win:title()
+        -- Check if title starts with [something]
+        local bracketContent = title:match("^%[([^%]]+)%]")
+        if bracketContent then
+            table.insert(choices, {
+                text = string.gsub(title, ' . Google Chrome', ''),
+                subText = bracketContent,
+                win = win,
+                app = "Chrome"
+            })
         end
     end
 
