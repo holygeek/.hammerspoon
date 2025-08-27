@@ -26,6 +26,17 @@ function findBiggestExternalMonitor()
     return biggestExternal
 end
 
+-- Function to find a specific screen by name
+function findScreenByName(name)
+    local screens = hs.screen.allScreens()
+    for _, screen in ipairs(screens) do
+        if screen:name() == name then
+            return screen
+        end
+    end
+    return nil
+end
+
 -- Function to position iTerm windows using percentage-based positions
 function obj:positionItermWindows(itermPositions, config)
     local itermApp = hs.application.find("iTerm2") or hs.application.find("iTerm")
@@ -38,6 +49,7 @@ function obj:positionItermWindows(itermPositions, config)
     local screens = hs.screen.allScreens()
     local laptopScreen = hs.screen.primaryScreen()
     local externalScreen = findBiggestExternalMonitor()
+    local dellU2419H = findScreenByName("DELL U2419H")
 
     -- Determine which position set to use
     local positions = itermPositions.solo
@@ -56,8 +68,14 @@ function obj:positionItermWindows(itermPositions, config)
             local pos = positions[letter]
             local targetScreen = laptopScreen
 
+            -- Special handling for window "r" when DELL U2419H exists
+            if letter == 'r' and dellU2419H then
+                targetScreen = dellU2419H
+                -- Override position to full screen for "r" on DELL U2419H
+                pos = {0, 0, 100, 100}
+                print("Special handling: Placing iTerm 'r' on DELL U2419H full screen")
             -- If external monitor exists and this isn't window 'a', use external monitor
-            if externalScreen and letter ~= 'a' then
+            elseif externalScreen and letter ~= 'a' then
                 targetScreen = externalScreen
             end
 
