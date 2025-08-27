@@ -786,6 +786,27 @@ end
 
 hs.hotkey.bind({"alt"}, "j", showChromeBracketWindows)
 
+-- Text chooser for common phrases
+local textChooser = hs.chooser.new(function(choice)
+    if not choice then return end
+    hs.eventtap.keyStrokes(choice.text)
+end)
+
+textChooser:bgDark(true)
+textChooser:rows(10)
+
+function showTextChooser()
+    local choices = {
+        {text = "Valid request"},
+    }
+
+    textChooser:choices(choices)
+    textChooser:query(nil)
+    textChooser:show()
+end
+
+hs.hotkey.bind({"alt", "shift"}, "r", showTextChooser)
+
 -- Log total time at the end
 logTime("Total config load time")
 print(string.format("[TIMING] Config fully loaded in %.3fs", os.clock() - startTime))
