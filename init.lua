@@ -798,6 +798,7 @@ textChooser:rows(10)
 function showTextChooser()
     local choices = {
         {text = "Valid request"},
+        {text = "where created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)"},
     }
 
     textChooser:choices(choices)
