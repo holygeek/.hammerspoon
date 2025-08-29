@@ -9,6 +9,9 @@ logTime("hs.ipc.cliInstall")
 
 hs.window.animationDuration = 0
 
+-- Global variable to control terminal preference: "iTerm" or "Ghostty"
+TERMINAL_PREFERENCE = "iTerm"  -- Change to "Ghostty" to use Ghostty instead of iTerm
+
 -- Hardcoded iTerm window positions as percentages of screen dimensions
 -- Format: {x%, y%, width%, height%}
 logTime("Initial setup")
@@ -215,8 +218,12 @@ hs.hotkey.bind({"alt"}, "x", function()
 		end
 	end
 
-	-- Use new percentage-based positioning for iTerm
-	rw:positionItermWindows(itermPositions, config)
+	-- Position terminal windows based on preference
+	if TERMINAL_PREFERENCE == "Ghostty" then
+		rw:positionGhosttyWindows(itermPositions, config)
+	else
+		rw:positionItermWindows(itermPositions, config)
+	end
 
 	-- Continue with file-based positioning for other apps
 	if config == "home" then
@@ -230,6 +237,28 @@ hs.hotkey.bind({"alt"}, "x", function()
 	rw:run('Cursor', '(.+)')
 	hs.alert.show("Done")
 	-- hs.execute("$HOME/dev/bin/restore.window.positions", true)
+end)
+
+-- Alt+Shift+X to position Ghostty windows (always Ghostty, regardless of preference)
+hs.hotkey.bind({"alt", "shift"}, "x", function()
+	local nScreen = #hs.screen.allScreens()
+	local config = "solo"
+	if nScreen >= 2 then
+		for i, screen in ipairs(hs.screen.allScreens()) do
+			print(i, '"' .. screen:name() .. '"', screen:id())
+			if screen:name() == 'Dell AW3821DW' then
+				config = "home"
+				break
+			elseif screen:name() == 'DELL U2723QE' then
+				config = "office"
+				break
+			end
+		end
+	end
+
+	-- Always position Ghostty windows with alt+shift+X
+	rw:positionGhosttyWindows(itermPositions, config)
+	hs.alert.show("Ghostty windows positioned")
 end)
 
 hs.hotkey.showHotkeys({"cmd", "alt"}, "k")
@@ -314,13 +343,55 @@ function raiseIterm(termName)
 		return false
 	end
 end
+
+function raiseGhostty(termName)
+	for _, app in ipairs(hs.application.runningApplications()) do
+		if app:name() == "Ghostty" then
+			for _, window in ipairs(app:allWindows()) do
+				local title = window:title()
+				local windowLetter = title:match("^ghostty%.([a-z])$") or title:match("^([a-z])$")
+				if windowLetter == termName then
+					window:focus()
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
 function startTmux()
-	for i=1,#iterms do
-		local termName = iterms[i]
-		if raiseIterm(termName) then
-			hs.eventtap.keyStrokes('tm ' .. termName .. '\n')
-		else
-			print("could not raise " .. termName)
+	if TERMINAL_PREFERENCE == "Ghostty" then
+		-- For Ghostty, raise or launch each window and start tmux
+		for i=1,#iterms do
+			local termName = iterms[i]
+			if not raiseGhostty(termName) then
+				-- Launch the Ghostty window
+				print("Launching Ghostty window for tmux: " .. termName)
+				local cmd = string.format("open -n /Applications/Ghostty.app --args --quit-after-last-window-closed --title=%s &", termName)
+				print("cmd " .. cmd)
+				hs.execute(cmd, false)
+				-- Wait a bit for window to appear
+				hs.timer.usleep(500000)
+			end
+			-- Try to raise it again after potential launch
+			if raiseGhostty(termName) then
+				local cmd = 'tm ' .. termName .. '\n'
+				print("keystroke cmd: " .. cmd)
+				hs.eventtap.keyStrokes(cmd)
+			else
+				print("could not raise Ghostty " .. termName)
+			end
+		end
+	else
+		-- Original iTerm behavior
+		for i=1,#iterms do
+			local termName = iterms[i]
+			if raiseIterm(termName) then
+				hs.eventtap.keyStrokes('tm ' .. termName .. '\n')
+			else
+				print("could not raise " .. termName)
+			end
 		end
 	end
 end
@@ -446,16 +517,76 @@ function raiseAppWindow(appName, title)
 		-- print(os.clock() - start)
 	end
 end
--- iterm2 windows
--- ==============
-logTime("Starting iTerm hotkey bindings")
-hs.hotkey.bind({"cmd", "alt"}, "t", startTmux)
-for i=1,#iterms do
-	local termName = iterms[i]
-	-- hs.hotkey.bind({"alt"}, termName, raiseWindow('^' ..  termName .. '$'))
-	hs.hotkey.bind({"alt"}, termName, raiseAppWindow('iTerm', termName))
+
+-- Function to raise or launch Ghostty window
+function raiseOrLaunchGhostty(letter)
+	return function()
+		-- Try to find existing Ghostty window
+		local found = false
+		for _, app in ipairs(hs.application.runningApplications()) do
+			if app:name() == "Ghostty" then
+				for _, window in ipairs(app:allWindows()) do
+					local title = window:title()
+					local windowLetter = title:match("^ghostty%.([a-z])$") or title:match("^([a-z])$")
+					if windowLetter == letter then
+						window:focus()
+						found = true
+						break
+					end
+				end
+				if found then break end
+			end
+		end
+
+		-- If not found, launch it
+		if not found then
+			print("Launching Ghostty window: " .. letter)
+			local cmd = string.format("open -n /Applications/Ghostty.app --args --quit-after-last-window-closed --title=%s &", letter)
+			print("cmd " .. cmd)
+			hs.execute(cmd, false)
+		end
+	end
 end
-logTime("iTerm hotkey bindings complete")
+
+-- Function to setup terminal hotkeys based on preference
+function setupTerminalHotkeys()
+	-- Simply rebind the hotkeys - Hammerspoon will override existing ones
+	if TERMINAL_PREFERENCE == "Ghostty" then
+		-- Ghostty mode
+		for i=1,#iterms do
+			local termName = iterms[i]
+			hs.hotkey.bind({"alt"}, termName, raiseOrLaunchGhostty(termName))
+		end
+		-- startTmux now works for both iTerm and Ghostty
+		hs.hotkey.bind({"cmd", "alt"}, "t", startTmux)
+	else
+		-- iTerm mode (default)
+		hs.hotkey.bind({"cmd", "alt"}, "t", startTmux)
+		for i=1,#iterms do
+			local termName = iterms[i]
+			hs.hotkey.bind({"alt"}, termName, raiseAppWindow('iTerm', termName))
+		end
+	end
+end
+
+-- Terminal windows hotkeys (iTerm or Ghostty based on preference)
+-- ================================================================
+logTime("Starting terminal hotkey bindings")
+setupTerminalHotkeys()
+logTime("Terminal hotkey bindings complete")
+
+-- Toggle terminal preference between iTerm and Ghostty
+hs.hotkey.bind({"alt", "shift"}, "g", function()
+	if TERMINAL_PREFERENCE == "iTerm" then
+		TERMINAL_PREFERENCE = "Ghostty"
+		hs.alert.show("Switched to Ghostty")
+	else
+		TERMINAL_PREFERENCE = "iTerm"
+		hs.alert.show("Switched to iTerm")
+	end
+	-- Re-setup hotkeys with new preference
+	setupTerminalHotkeys()
+end)
 
 -- 2025-01-06 00:06:16: no window found matching ghostty.b
 -- ran with "~/bin/ghostty.run b"

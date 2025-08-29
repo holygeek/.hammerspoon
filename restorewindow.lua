@@ -95,6 +95,103 @@ function obj:positionItermWindows(itermPositions, config)
     end
 end
 
+-- Function to position Ghostty windows using percentage-based positions
+function obj:positionGhosttyWindows(ghosttyPositions, config)
+    local screens = hs.screen.allScreens()
+    local laptopScreen = hs.screen.primaryScreen()
+    local externalScreen = findBiggestExternalMonitor()
+    local dellU2419H = findScreenByName("DELL U2419H")
+
+    -- Determine which position set to use
+    local positions = ghosttyPositions.solo
+    if externalScreen then
+        positions = ghosttyPositions.external[config]
+    end
+    print("Ghostty positions name: " .. positions.name)
+
+    -- Get all Ghostty windows
+    local ghosttyWindows = {}
+    local foundLetters = {}
+    for _, app in ipairs(hs.application.runningApplications()) do
+        if app:name() == "Ghostty" then
+            for _, window in ipairs(app:allWindows()) do
+                local title = window:title()
+                -- Extract single letter from title
+                local letter = title:match("^ghostty%.([a-z])$") or title:match("^([a-z])$")
+                if letter then
+                    foundLetters[letter] = true
+                    ghosttyWindows[letter] = window
+                end
+            end
+        end
+    end
+
+    -- Launch missing Ghostty windows for all configured positions
+    local windowLetters = {"a", "s", "v", "r", "f", "g", "i", "h", "l", "k"}
+    for _, letter in ipairs(windowLetters) do
+        if positions[letter] and not foundLetters[letter] then
+            print("Launching missing Ghostty window: " .. letter)
+            -- Launch Ghostty with the specific window name
+            -- Assuming the command is something like: ghostty --title=ghostty.a or similar
+            -- You may need to adjust this based on how Ghostty accepts window titles
+            local cmd = string.format("$HOME/bin/ghostty.run %s &", letter)
+            hs.execute(cmd, false)
+            foundLetters[letter] = true
+        end
+    end
+
+    -- Wait a bit for new windows to appear
+    if next(foundLetters) then
+        hs.timer.usleep(500000)  -- Wait 0.5 seconds
+    end
+
+    -- Re-fetch all Ghostty windows including newly launched ones
+    ghosttyWindows = {}
+    for _, app in ipairs(hs.application.runningApplications()) do
+        if app:name() == "Ghostty" then
+            for _, window in ipairs(app:allWindows()) do
+                local title = window:title()
+                local letter = title:match("^ghostty%.([a-z])$") or title:match("^([a-z])$")
+                if letter then
+                    ghosttyWindows[letter] = window
+                end
+            end
+        end
+    end
+
+    -- Position each Ghostty window
+    for letter, window in pairs(ghosttyWindows) do
+        if positions[letter] then
+            local pos = positions[letter]
+            local targetScreen = laptopScreen
+
+            -- Special handling for window "r" when DELL U2419H exists
+            if letter == 'r' and dellU2419H then
+                targetScreen = dellU2419H
+                -- Override position to full screen for "r" on DELL U2419H
+                pos = {0, 0, 100, 100}
+                print("Special handling: Placing Ghostty 'r' on DELL U2419H full screen")
+            -- If external monitor exists and this isn't window 'a', use external monitor
+            elseif externalScreen and letter ~= 'a' then
+                targetScreen = externalScreen
+            end
+
+            local frame = targetScreen:frame()
+            local newFrame = {
+                x = frame.x + (frame.w * pos[1] / 100),
+                y = frame.y + (frame.h * pos[2] / 100),
+                w = frame.w * pos[3] / 100,
+                h = frame.h * pos[4] / 100
+            }
+
+            print(string.format("Positioning Ghostty '%s' to {x=%.0f, y=%.0f, w=%.0f, h=%.0f}",
+                letter, newFrame.x, newFrame.y, newFrame.w, newFrame.h))
+
+            window:setFrame(newFrame)
+        end
+    end
+end
+
 function atRightLocation(window, geom)
 	local tl = window:topLeft()
 	local sz = window:size()
