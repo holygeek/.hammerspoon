@@ -3,21 +3,24 @@ local app, windows;
 
 local name = _cli.args[2]
 
-app = hs.application.find(name)
-if not app then
+apps = {hs.application.find(name)}
+if #apps < 1 then
 	print('no app found', name)
 	do return end
 end
 
-local mw = app:mainWindow()
-windows = app:allWindows()
+for a=1,#apps do
+	local app = apps[a]
+	local mw = app:mainWindow()
+	windows = app:allWindows()
 
-for i=1,#windows do
-	local w = windows[i]
-	local f = w:frame()
-	local main = '       '
-	if mw == w then
-		main = ' (main)'
+	for i=1,#windows do
+		local w = windows[i]
+		local f = w:frame()
+		local main = '       '
+		if mw == w then
+			main = ' (main)'
+		end
+		print(string.format("%s %4d %4d %4d %4d", app:name(), f.x, f.y, f.w, f.h) .. main .. ' ' .. w:title() .. ' ')
 	end
-	print(string.format("%s %4d %4d %4d %4d", app:name(), f.x, f.y, f.w, f.h) .. main .. ' ' .. w:title() .. ' ')
 end
