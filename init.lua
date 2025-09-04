@@ -376,9 +376,9 @@ function startTmux()
 			end
 			-- Try to raise it again after potential launch
 			if raiseGhostty(termName) then
-				local cmd = 'tm ' .. termName .. '\n'
-				print("keystroke cmd: " .. cmd)
+				local cmd = 'tm ' .. termName
 				hs.eventtap.keyStrokes(cmd)
+				hs.eventtap.keyStroke({}, "return")
 			else
 				print("could not raise Ghostty " .. termName)
 			end
