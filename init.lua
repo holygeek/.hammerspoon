@@ -319,6 +319,14 @@ end
 function raiseAllWindow(appname)
 	return function()
 		local apps = {hs.application.find(appname)}
+		if #apps == 0 and appname == "Notes" then
+			-- Launch Notes
+			local cmd = "open -a Notes"
+			print("cmd " .. cmd)
+			hs.execute(cmd, false)
+			-- Wait a bit for window to appear
+			hs.timer.usleep(500000)
+		end
 		for i=1,#apps do
 			apps[i]:activate(true)
 			if appname == "Slack" then
